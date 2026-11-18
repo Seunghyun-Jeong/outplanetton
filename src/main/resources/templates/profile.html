@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Outplanetton</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<head th:replace="~{fragments/head :: head}"></head>
 <body>
 
 <div th:replace="~{fragments/header :: header}"></div>
@@ -169,7 +165,7 @@
 
 <script src="/js/postCards.js"></script>
 <script src="/js/feedList.js"></script>
-<script src="/js/postModal.js"></script>
+<script src="/js/postModal.js?v=2"></script>
 <script>
     initPostCards(document);
 

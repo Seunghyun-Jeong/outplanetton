@@ -1,0 +1,12 @@
+<!-- 모든 화면이 쓰는 head. 화면마다 복사해 두면 한 곳이 빠지기 쉬워서(viewport가 11곳 모두 빠져 있었다) 여기 한 곳에만 둔다.
+     화면은 <head th:replace="~{fragments/head :: head}"></head> 한 줄만 적는다. 빠뜨리면 PageHeadTest가 잡는다. -->
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <!-- 이 줄이 없으면 휴대폰 브라우저는 폭 980px짜리 화면이 있다고 치고 그린 뒤 통째로 줄인다.
+         그러면 style.css의 좁은 화면 규칙(max-width)이 휴대폰에서 켜지지 않는다.
+         확대를 막는 maximum-scale은 넣지 않는다. 글씨를 키워 봐야 하는 사람이 볼 수 없게 된다. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Outplanetton</title>
+    <!-- style.css를 고치면 v를 올린다. 브라우저에 남은 옛 CSS가 새 마크업과 어긋나지 않게 한다 -->
+    <link rel="stylesheet" th:href="@{/css/style.css?v=2}">
+</head>

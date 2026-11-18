@@ -7,6 +7,16 @@
     box-sizing: border-box;
 }
 
+/* 아이폰 Safari는 글자가 16px보다 작은 입력칸을 누르면 화면을 저절로 확대하고, 다 쓴 뒤에도 원래대로 돌아오지 않는다.
+   좁은 화면에서는 입력칸 글자를 16px로 맞춘다. 컴포넌트마다 정한 크기(14px 등)를 모두 이겨야 해서 !important를 쓴다. */
+@media (max-width: 640px) {
+    input,
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+}
+
 /*
  * 페이지 배경색은 한 곳에서만 정의한다.
  * 헤더 프로스트가 같은 색의 반투명이어야 하는데,
@@ -565,14 +575,81 @@ button {
     overflow: hidden;
 }
 
-/* 오른쪽: 헤더 / 본문 / 액션바 / 좋아요수 / 입력창 세로 스택 */
+/* 오른쪽: 헤더 / 본문 / 액션바 / 좋아요수 / 입력창 세로 스택.
+   댓글 칸이 300px보다 좁아지면 이름과 댓글이 한두 글자씩 끊긴다(768px 폭에서 222px였다). 폭이 모자라면 사진 쪽이 줄게 한다. */
 .post-detail-side {
     width: 38%;
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-width: 0;
+    min-width: 300px;
     border-left: 1px solid #efefef;
+}
+
+/* 닫기 버튼은 모달이 화면을 다 덮는 좁은 화면에서만 보인다. 넓은 화면은 바깥을 누르거나 Esc로 닫는다 */
+.modal-close-btn {
+    display: none;
+}
+
+/* 태블릿 가로처럼 애매한 폭에서는 모달을 넓혀서 300px 댓글 칸 옆의 사진 자리를 확보한다 */
+@media (max-width: 1024px) {
+    .modal {
+        width: 92vw;
+    }
+}
+
+/* 768px 이하(휴대폰, 세로 태블릿)에서는 좌우로 나눌 폭이 안 되므로 화면을 다 덮고 사진 위, 댓글 아래로 쌓는다.
+   댓글 목록(.pd-body)은 지금처럼 자기 안에서 스크롤해야 댓글 무한 스크롤(watchListEnd의 root)이 그대로 동작한다.
+   그래서 모달 전체를 스크롤시키지 않고 사진 높이를 고정한 뒤 남은 높이를 댓글 칸에 준다. */
+@media (max-width: 768px) {
+    /* 부모(#modalContent)에 높이가 없어서 %로는 화면을 채울 수 없다(내용만큼 1191px까지 늘어났다). 화면 단위로 잡는다 */
+    .modal {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    .modal-content {
+        flex-direction: column;
+    }
+
+    .post-detail-media {
+        width: 100%;
+        flex: none;
+        height: 45vh;
+        height: min(100vw, 45dvh);
+    }
+
+    .post-detail-side {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        flex: 1;
+        min-height: 0;
+        border-left: none;
+        border-top: 1px solid #efefef;
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0; /* 전역 button 여백(10px 15px)이 남으면 36px 안에서 아이콘이 6px로 눌린다 */
+        border: none;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        cursor: pointer;
+    }
 }
 
 /* 헤더 */
@@ -1058,6 +1135,10 @@ button {
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
+/* 좁은 화면에서만 메뉴에 나오는 항목(내 프로필, 로그아웃). 넓은 화면에서는 헤더 바에 같은 버튼이 있다 */
+.dropdown-content .menu-narrow-only {
+    display: none;
+}
 /* 각 메뉴 행(앵커 또는 버튼) 사이 구분선 */
 .dropdown-content > a,
 .dropdown-content > button {
@@ -1146,6 +1227,48 @@ button {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 15px;
+}
+
+/* 좁은 화면 프로필.
+   사진(150px) 옆에 통계를 두면 "게시물, 팔로워, 팔로잉"이 한 글자씩 세로로 끊겼다. 사진을 줄이고 통계는 낱말 단위로만 줄바꿈한다.
+   게시글은 3열이면 한 칸이 88px라 좋아요, 댓글 수와 글이 잘린다. 카드는 피드와 같은 공용 카드라 내용을 빼지 않고 2열로 줄인다. */
+@media (max-width: 640px) {
+    .profile-container {
+        padding: 24px 0;
+    }
+
+    .profile-header {
+        padding: 20px;
+    }
+
+    .profile-img {
+        width: 88px;
+        height: 88px;
+        margin-right: 20px;
+        flex-shrink: 0;
+    }
+
+    .profile-info {
+        min-width: 0;
+    }
+
+    .profile-info h2 {
+        font-size: 22px;
+    }
+
+    .profile-stats {
+        flex-wrap: wrap;
+        gap: 6px 14px;
+    }
+
+    .profile-stats > span {
+        white-space: nowrap;
+    }
+
+    .profile-posts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
 }
 
 .post-thumbnail img {
@@ -1904,13 +2027,8 @@ button {
     text-decoration: none;
 }
 
-/* 좁은 화면에서는 검색창을 줄이고 드롭다운을 화면에 맞춘다 */
+/* 좁은 화면에서는 드롭다운을 화면에 맞춘다. 검색창 자체를 접고 펼치는 규칙은 아래 "좁은 화면 헤더"에 있다 */
 @media (max-width: 640px) {
-    .search-box {
-        flex: 0 1 130px;
-        margin: 0 8px;
-    }
-
     .search-dropdown {
         position: fixed;
         top: 86px;
@@ -1928,8 +2046,12 @@ button {
     white-space: nowrap;
 }
 
-/* 좁은 화면 헤더: 검색창이 들어오면서 공간이 부족해진다.
-   로고를 줄이고 유저명을 숨겨 검색창 자리를 확보한다. */
+/* 좁은 화면 헤더. 375px 폭에서는 로고, 검색창, 메시지, 알림, 이름과 로그아웃, 메뉴가 한 줄에 다 들어가지 않는다
+   (로그아웃을 빼도 검색창 자리가 41px만 남았다). 그래서
+   1) 이름과 로그아웃 묶음은 숨기고, 같은 동작을 메뉴 안 "내 프로필", "로그아웃"으로 옮긴다.
+   2) 검색창은 돋보기 버튼으로 접어 두고, 누르면(포커스) 헤더 줄을 덮어서 펼친다.
+      검색창을 둘째 줄로 내리면 헤더가 높아져서 헤더 높이에 맞춘 위치값(드롭다운 top: 86px 등)을 모두 다시 맞춰야 한다.
+      덮어서 펼치면 헤더 높이도, 다른 요소의 자리도 그대로다. */
 @media (max-width: 640px) {
     .header-bar {
         padding: 0 16px;
@@ -1943,14 +2065,47 @@ button {
         gap: 8px;
     }
 
-    .header-bar .username {
+    /* 95줄의 .header-bar .user-info > span(display: flex)보다 우선해야 해서 같은 경로로 적는다 */
+    .header-bar .user-info > .header-account {
         display: none;
     }
 
+    .dropdown-content .menu-narrow-only {
+        display: block;
+    }
+
+    /* 왼쪽 auto 여백이 남는 자리를 먹어서 돋보기가 오른쪽 아이콘들 옆에 붙는다 */
     .search-box {
-        flex: 1 1 auto;
-        min-width: 0;
-        margin: 0 10px;
+        flex: 0 0 36px;
+        margin: 0 8px 0 auto;
+    }
+
+    .header-bar .search-box:not(:focus-within) .search-input {
+        padding: 0;
+        color: transparent;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-opacity='0.85' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='16.5' y1='16.5' x2='21' y2='21'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 18px;
+    }
+
+    .header-bar .search-box:not(:focus-within) .search-input::placeholder {
+        color: transparent;
+    }
+
+    /* 헤더 바(position: relative)를 기준으로 줄 전체를 덮는다.
+       배경은 헤더 색을 그대로 물려받아 밑에 깔린 로고와 아이콘을 가린다(색을 여기 또 적지 않는다) */
+    .header-bar .search-box:focus-within {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        z-index: 3;
+        background: inherit;
+        border-radius: inherit;
     }
 }
 
@@ -2848,6 +3003,17 @@ body > h2,
 /* --- 관리자 신고 상세 --- */
 .report-actions-bar {
     justify-content: space-between;
+}
+
+/* 좁은 화면에서는 "게시글과 댓글 보기" 링크가 버튼들에 밀려 세 줄로 끊겼다. 버튼 묶음을 다음 줄로 내린다 */
+@media (max-width: 640px) {
+    .report-actions-bar {
+        flex-wrap: wrap;
+    }
+
+    .report-link {
+        white-space: nowrap;
+    }
 }
 
 .report-actions-right {

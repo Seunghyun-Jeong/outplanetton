@@ -188,9 +188,9 @@
     }
   }
 
-  // 모달 바깥(어두운 백드롭) 클릭 시 닫기
+  // 모달 바깥(어두운 백드롭)이나 닫기 버튼(좁은 화면에서만 보임)을 누르면 닫기
   document.getElementById('postDetailModal').addEventListener('click', function (event) {
-    if (event.target === this) closePostModal();
+    if (event.target === this || event.target.closest('.modal-close-btn')) closePostModal();
   });
 
   // ESC 키로도 닫기 (수정 모달이 열려 있으면 그것부터 닫음)

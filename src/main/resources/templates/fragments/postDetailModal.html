@@ -4,6 +4,14 @@
     <input type="hidden" id="currentUsername" th:value="${currentUsername}" />
     <input type="hidden" id="currentUserRole" th:value="${currentUserRole}" />
 
+    <!-- 좁은 화면에서는 모달이 화면을 다 덮어서 바깥을 눌러 닫을 수 없고 Esc 키도 없다. 그때만 보인다 -->
+    <button type="button" class="modal-close-btn" aria-label="닫기">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18"/>
+        </svg>
+    </button>
+
     <div class="modal-content" th:attr="data-post-id=${post.id}">
 
         <!-- 왼쪽: 이미지 전용 -->

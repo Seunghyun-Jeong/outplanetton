@@ -251,7 +251,6 @@
 
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const dropdownMenu = document.getElementById('dropdownMenu');
-    const logoutBtn = document.getElementById('logoutBtn');
     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 
     // 햄버거 메뉴 열고 닫기
@@ -270,14 +269,15 @@
       });
     }
 
-    // 로그아웃: 쿠키를 만료시키고 메인으로 보낸다
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
+    // 로그아웃: 쿠키를 만료시키고 메인으로 보낸다.
+    // 버튼이 헤더 바와 메뉴(좁은 화면용) 두 곳에 있어서, 동작은 여기 하나로 두고 data-logout이 붙은 버튼에 모두 건다.
+    document.querySelectorAll('[data-logout]').forEach((btn) => {
+      btn.addEventListener('click', () => {
         fetch('/api/users/logout', { method: 'POST', credentials: 'include' })
           .then(() => { window.location.href = '/'; })
           .catch(() => { window.location.href = '/'; });
       });
-    }
+    });
 
     // 회원탈퇴
     if (deleteAccountBtn) {

@@ -46,9 +46,10 @@
         </div>
       </div>
 
-      <span th:if="${username != null}">
+      <!-- 좁은 화면에서는 이 묶음을 숨기고, 같은 동작을 메뉴 안의 "내 프로필", "로그아웃"으로 옮긴다 -->
+      <span th:if="${username != null}" class="header-account">
         <a th:href="@{'/profile/' + ${userId}}" class="username" th:text="${username}"></a>
-        <button id="logoutBtn" class="btn logout-btn">로그아웃</button>
+        <button class="btn logout-btn" data-logout>로그아웃</button>
       </span>
 
       <span th:if="${username == null}">
@@ -64,9 +65,11 @@
           </svg>
         </button>
         <div id="dropdownMenu" class="dropdown-content" style="display: none;">
+          <a th:if="${username != null}" th:href="@{'/profile/' + ${userId}}" class="menu-narrow-only"><button class="btn">내 프로필</button></a>
           <a th:if="${username != null}" href="/post"><button class="btn write-btn">게시글 작성</button></a>
           <a th:if="${username != null and userRole == 'ADMIN'}" href="/admin/reports"><button class="btn">신고 확인</button></a>
           <a th:if="${username != null and userRole == 'ADMIN'}" href="/admin/suspended-users"><button class="btn">정지 유저 목록</button></a>
+          <button th:if="${username != null}" class="btn menu-narrow-only" data-logout>로그아웃</button>
           <button th:if="${username != null}" id="deleteAccountBtn" class="btn delete-btn">회원탈퇴</button>
 
           <a th:if="${username == null}" href="/signup"><button class="btn signup-btn">회원가입</button></a>
@@ -76,7 +79,7 @@
   </div>
   <script src="/js/notify.js"></script>
   <script src="/js/infiniteScroll.js"></script>
-  <script src="/js/header.js"></script>
+  <script src="/js/header.js?v=2"></script>
   <script src="/js/notification.js?v=3"></script>
   <script src="/js/chat.js?v=10"></script>
   <script src="/js/search.js"></script>
