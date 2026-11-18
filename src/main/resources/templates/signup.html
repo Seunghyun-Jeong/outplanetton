@@ -6,16 +6,17 @@
 <h2>회원가입</h2>
 
 <form id="signupForm">
-    <label>ID :</label><br>
-    <input type="text" name="username" id="username"><br><br>
+    <!-- 아이디 칸은 휴대폰 자판이 첫 글자를 대문자로 바꾸지 않게 한다. 가입 규칙이 소문자만 받는다 -->
+    <label for="username">ID :</label><br>
+    <input type="text" name="username" id="username" autocomplete="username" autocapitalize="none" spellcheck="false"><br><br>
 
-    <label>비밀번호 :</label><br>
-    <input type="password" name="password" id="password"><br><br>
+    <label for="password">비밀번호 :</label><br>
+    <input type="password" name="password" id="password" autocomplete="new-password"><br><br>
 
-    <label>비밀번호 확인 :</label><br>
-    <input type="password" id="passwordConfirm"><br><br>
+    <label for="passwordConfirm">비밀번호 확인 :</label><br>
+    <input type="password" id="passwordConfirm" autocomplete="new-password"><br><br>
 
-    <button type="submit">가입하기</button>
+    <button type="submit" id="signupSubmit">가입하기</button>
 </form>
 
 <script>
@@ -53,6 +54,10 @@
 
         const formData = new FormData(document.getElementById("signupForm"));
 
+        // 응답이 오기 전에 다시 누르면 요청이 두 번 나간다. 실패했을 때만 다시 누를 수 있게 한다
+        const submitBtn = document.getElementById("signupSubmit");
+        submitBtn.disabled = true;
+
         fetch("/api/users/signup", {
             method: "POST",
             body: formData
@@ -67,11 +72,13 @@
                     }
                 } else {
                     showToast(data.message || "회원가입에 실패했습니다.", 'error');
+                    submitBtn.disabled = false;
                 }
             })
             .catch(error => {
                 console.error("회원가입 요청 실패:", error);
                 showToast("서버 오류로 회원가입에 실패했습니다.", 'error');
+                submitBtn.disabled = false;
             });
     });
 </script>

@@ -8,7 +8,7 @@ import lombok.Getter;
 public class AdminCommentDto {
     private final Long id;
     private final String content;
-    private final String createdAt;
+    private final LocalDateTime createdAt;
     private final Long postId;
     private final String postContent;
     private final String postAuthor;
@@ -17,7 +17,7 @@ public class AdminCommentDto {
                            Long postId, String postContent, String postAuthor) {
         this.id = id;
         this.content = content;
-        this.createdAt = createdAt.toString();
+        this.createdAt = createdAt;
         this.postId = postId;
         this.postContent = postContent;
         this.postAuthor = postAuthor;

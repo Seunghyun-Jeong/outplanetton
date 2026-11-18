@@ -13,27 +13,37 @@
         정지 사유 확인용 — 관리자만 볼 수 있는 페이지입니다.
     </p>
 
+    <!--
+      상자와 글자 모양은 신고 상세 화면의 한 줄(.admin-list-item.report-row)을 같이 쓴다.
+      피드 카드(.post-summary)는 사진이 꽉 차게 안쪽 여백이 0이라 글만 있는 이 화면에서는 글자가 상자 끝에 붙었다.
+      날짜는 정지 근거를 보는 화면이라 상대 시간이 아니라 정지 유저 목록과 같은 절대 시각으로 찍는다.
+    -->
     <h3 style="margin-top: 20px;">작성한 글</h3>
     <div th:if="${posts.isEmpty()}" style="color: #888; padding: 20px 0;">작성한 글이 없습니다.</div>
-    <div th:each="post : ${posts}" class="post-summary" style="cursor: default;">
-        <p style="color: #888; font-size: 13px; margin: 0 0 6px;">
-            <span th:if="${post.updatedAt == null}" th:text="'작성일: ' + ${post.createdAt}"></span>
-            <span th:if="${post.updatedAt != null}" th:text="'수정일: ' + ${post.updatedAt} + ' (수정됨)'"></span>
-        </p>
-        <div th:text="${post.content}">내용</div>
-        <p style="color: #888; font-size: 13px; margin: 8px 0 0;">
-            좋아요 <span th:text="${post.likeCount}">0</span> · 댓글 <span th:text="${post.commentCount}">0</span>
-        </p>
+    <div th:each="post : ${posts}" class="admin-list-item report-row">
+        <div class="report-row-main">
+            <span class="report-sub" th:if="${post.updatedAt == null}"
+                  th:text="'작성일 ' + ${T(com.example.sns.util.DateTimeDisplay).minutes(post.createdAt)}"></span>
+            <span class="report-sub" th:if="${post.updatedAt != null}"
+                  th:text="'수정일 ' + ${T(com.example.sns.util.DateTimeDisplay).minutes(post.updatedAt)} + ' (수정됨)'"></span>
+            <div class="report-detail-text" th:text="${post.content}">내용</div>
+            <div class="report-sub">
+                좋아요 <span th:text="${post.likeCount}">0</span>, 댓글 <span th:text="${post.commentCount}">0</span>
+            </div>
+        </div>
     </div>
 
     <h3 style="margin-top: 32px;">작성한 댓글</h3>
     <div th:if="${comments.isEmpty()}" style="color: #888; padding: 20px 0;">작성한 댓글이 없습니다.</div>
-    <div th:each="comment : ${comments}" class="post-summary" style="cursor: default;">
-        <p style="color: #888; font-size: 13px; margin: 0 0 6px;" th:text="'작성일: ' + ${comment.createdAt}"></p>
-        <div th:text="${comment.content}">댓글 내용</div>
-        <div style="margin-top: 10px; padding: 8px 10px; background: #f5f5f5; border-radius: 6px; font-size: 13px; color: #555;">
-            원문 글 (<span th:text="${comment.postAuthor}">작성자</span>):
-            <span th:text="${comment.postContent}">글 내용</span>
+    <div th:each="comment : ${comments}" class="admin-list-item report-row">
+        <div class="report-row-main">
+            <span class="report-sub"
+                  th:text="'작성일 ' + ${T(com.example.sns.util.DateTimeDisplay).minutes(comment.createdAt)}"></span>
+            <div class="report-detail-text" th:text="${comment.content}">댓글 내용</div>
+            <div class="admin-quote">
+                원문 글 (<span th:text="${comment.postAuthor}">작성자</span>):
+                <span th:text="${comment.postContent}">글 내용</span>
+            </div>
         </div>
     </div>
 </div>

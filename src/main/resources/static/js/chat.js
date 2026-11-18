@@ -381,9 +381,9 @@
   const editInput = document.getElementById('chatEditInput');
   let targetId = null;   // 메뉴가 열린 대상 메시지 id
 
+  // 여닫기는 dropdown.js가 맡는다. 다른 드롭다운이 열리거나 바깥을 누르면 닫히고, 닫히면 대상도 비운다
   function closeMenu() {
-    menu.style.display = 'none';
-    targetId = null;
+    dropdown.close(menu);
   }
 
   /** 상대가 읽기 전인 내 메시지에서만 메뉴를 연다 */
@@ -393,8 +393,8 @@
     if (el.dataset.read === 'true' || el.dataset.deleted === 'true') return;
 
     e.preventDefault();
+    dropdown.open(menu, { onClose: () => { targetId = null; } });
     targetId = el.dataset.id;
-    menu.style.display = 'block';
 
     // 메뉴는 .chat-room-container 기준으로 배치되므로(offsetParent),
     // 좌표 변환과 경계 보정 모두 같은 기준을 써야 한다.
@@ -405,9 +405,6 @@
     menu.style.top = Math.max(8, y) + 'px';
   });
 
-  document.addEventListener('click', (e) => {
-    if (!menu.contains(e.target)) closeMenu();
-  });
   messagesEl.addEventListener('scroll', closeMenu);
 
   document.getElementById('chatEditBtn').addEventListener('click', () => {

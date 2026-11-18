@@ -1,9 +1,9 @@
 (function () {
   const btn = document.getElementById('notiBtn');
-  const dropdown = document.getElementById('notiDropdown');
+  const panel = document.getElementById('notiDropdown');
   const badge = document.getElementById('notiBadge');
   const list = document.getElementById('notiList');
-  if (!btn || !dropdown || !list) return;   // 비로그인 상태에는 알림 영역이 없다
+  if (!btn || !panel || !list) return;   // 비로그인 상태에는 알림 영역이 없다
 
   // 실시간 연결이 끊겼다 다시 이어졌을 때만 부른다. 그 사이 놓친 숫자를 맞춘다
   async function loadUnreadCount() {
@@ -25,7 +25,7 @@
   }
 
   async function loadNotifications() {
-    list.innerHTML = '<div class="noti-empty">불러오는 중...</div>';
+    list.innerHTML = '<div class="noti-empty">불러오는 중…</div>';
     try {
       const res = await fetch('/api/notifications', { credentials: 'include' });
       const data = await res.json();
@@ -96,7 +96,7 @@
     }
 
     row.addEventListener('click', () => {
-      dropdown.style.display = 'none';
+      dropdown.close(panel);
       if (n.type === 'FOLLOW') {
         window.location.href = '/profile/' + n.actorId;
       } else if (n.postId) {
@@ -107,24 +107,16 @@
     return row;
   }
 
-  btn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    const opening = dropdown.style.display !== 'block';
-    dropdown.style.display = opening ? 'block' : 'none';
-    if (!opening) return;
+  // 여닫기와 바깥 클릭은 dropdown.js가 맡는다. 여기서는 열 때 할 일만 정한다
+  dropdown.bind(btn, panel, {
+    onOpen: async () => {
+      await loadNotifications();
 
-    await loadNotifications();
-
-    // 열어서 확인했으므로 읽음 처리하고 배지를 지운다
-    try {
-      await fetch('/api/notifications/read', { method: 'POST', credentials: 'include' });
-      setBadge(0);
-    } catch (err) { /* 무시 */ }
-  });
-
-  document.addEventListener('click', (e) => {
-    if (dropdown.style.display === 'block' && !e.target.closest('.noti-menu')) {
-      dropdown.style.display = 'none';
+      // 열어서 확인했으므로 읽음 처리하고 배지를 지운다
+      try {
+        await fetch('/api/notifications/read', { method: 'POST', credentials: 'include' });
+        setBadge(0);
+      } catch (err) { /* 무시 */ }
     }
   });
 

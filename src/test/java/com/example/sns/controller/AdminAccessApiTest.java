@@ -10,9 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.sns.entity.User;
-import com.example.sns.repository.UserRepository;
 import com.example.sns.service.ReportService;
-import com.example.sns.util.JwtUtil;
+import com.example.sns.support.TestUsers;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,13 +38,7 @@ class AdminAccessApiTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    private TestUsers testUsers;
 
     @Autowired
     private ReportService reportService;
@@ -58,23 +50,10 @@ class AdminAccessApiTest {
 
     @BeforeEach
     void setUp() {
-        member = createUser("member1", User.Role.USER);
-        admin = createUser("admin1", User.Role.ADMIN);
-        memberCookie = createCookie(member);
-        adminCookie = createCookie(admin);
-    }
-
-    private User createUser(String username, User.Role role) {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode("Test1234!"));
-        user.setRole(role);
-        return userRepository.save(user);
-    }
-
-    private Cookie createCookie(User user) {
-        return new Cookie("JWT_TOKEN",
-                jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole().name()));
+        member = testUsers.create("member1");
+        admin = testUsers.create("admin1", User.Role.ADMIN);
+        memberCookie = testUsers.cookie(member);
+        adminCookie = testUsers.cookie(admin);
     }
 
     @Test

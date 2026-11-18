@@ -66,14 +66,12 @@
   // ...(더보기) 메뉴 토글 + 댓글 아이콘 → 입력창 포커스
   function initPostMenu() {
     const menuBtn = document.querySelector('#modalContent .pd-menu-btn');
-    const dropdown = document.querySelector('#modalContent .pd-menu-dropdown');
-    if (menuBtn && dropdown) {
-      menuBtn.onclick = (e) => {
-        e.stopPropagation();
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-      };
-      dropdown.querySelectorAll('.btn').forEach(b =>
-        b.addEventListener('click', () => { dropdown.style.display = 'none'; }));
+    const menu = document.querySelector('#modalContent .pd-menu-dropdown');
+    if (menuBtn && menu) {
+      // 여닫기와 바깥 클릭은 dropdown.js가 맡는다
+      dropdown.bind(menuBtn, menu);
+      menu.querySelectorAll('.btn').forEach(b =>
+        b.addEventListener('click', () => dropdown.close(menu)));
     }
     const commentIc = document.getElementById('pdCommentFocus');
     if (commentIc) {
@@ -81,13 +79,6 @@
     }
   }
 
-  // ...메뉴 바깥 클릭 시 닫기 (전역 1회)
-  document.addEventListener('click', (e) => {
-    const dd = document.querySelector('#modalContent .pd-menu-dropdown');
-    if (dd && dd.style.display === 'block' && !e.target.closest('.pd-menu')) {
-      dd.style.display = 'none';
-    }
-  });
 
   function initDeleteButton() {
     const deleteBtn = document.querySelector('#modalContent .delete-post-btn');

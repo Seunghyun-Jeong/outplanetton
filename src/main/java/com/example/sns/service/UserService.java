@@ -7,8 +7,8 @@ import com.example.sns.entity.User.Role;
 import com.example.sns.entity.User;
 import com.example.sns.exception.NotFoundException;
 import com.example.sns.repository.UserRepository;
+import com.example.sns.util.DateTimeDisplay;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -85,14 +85,13 @@ public class UserService {
     }
 
     public List<SuspendedUserDto> getSuspendedUsers() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
         return userRepository.findBySuspendedUntilAfterOrderBySuspendedUntilAsc(LocalDateTime.now()).stream()
                 .map(user -> new SuspendedUserDto(
                         user.getId(),
                         user.getUsername(),
                         user.getSuspendedUntil().getYear() >= 9999
                                 ? "영구 정지"
-                                : user.getSuspendedUntil().format(formatter)
+                                : DateTimeDisplay.minutes(user.getSuspendedUntil())
                 ))
                 .collect(Collectors.toList());
     }

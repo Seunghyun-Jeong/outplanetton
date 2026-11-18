@@ -32,7 +32,8 @@
      th:onclick="'openPostModal(' + ${post.id} + ')'"
      style="cursor:pointer;">
 
-  <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" class="post-image" alt="게시물 이미지" />
+  <!-- 화면 밖 사진은 가까워질 때 받는다. 카드는 aspect-ratio로 자리를 먼저 잡아서 늦게 와도 밀리지 않는다 -->
+  <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" class="post-image" alt="게시물 이미지" loading="lazy" />
 
   <div class="post-actions">
     <span class="feed-like-btn icon-btn" th:classappend="${post.likedByCurrentUser} ? 'liked' : ''" th:attr="data-post-id=${post.id}">

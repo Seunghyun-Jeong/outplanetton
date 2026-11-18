@@ -34,7 +34,7 @@
     </div>
 
     <form id="chatSendForm" class="chat-send-form" autocomplete="off">
-        <input type="text" id="chatInput" class="chat-input" placeholder="메시지 입력..." th:maxlength="${T(com.example.sns.entity.ChatMessage).MAX_CONTENT_LENGTH}" />
+        <input type="text" id="chatInput" class="chat-input" placeholder="메시지 입력…" aria-label="메시지" th:maxlength="${T(com.example.sns.entity.ChatMessage).MAX_CONTENT_LENGTH}" />
         <button type="submit" id="chatSendBtn" class="chat-send-btn" disabled>보내기</button>
     </form>
 </div>

@@ -102,7 +102,7 @@
     <div class="img-modal-backdrop" id="nicknameModalBackdrop"></div>
     <div class="img-modal-content">
         <h3 style="margin: 0;">닉네임 수정</h3>
-        <input type="text" id="nicknameInput" th:value="${profileUsername}"
+        <input type="text" id="nicknameInput" th:value="${profileUsername}" aria-label="닉네임"
                style="padding: 8px 10px; font-size: 16px; width: 220px; border: 1px solid #ccc; border-radius: 6px;" />
         <div style="display: flex; gap: 10px;">
             <button id="saveNicknameBtn" class="btn login-btn">저장</button>
@@ -165,7 +165,7 @@
 
 <script src="/js/postCards.js"></script>
 <script src="/js/feedList.js"></script>
-<script src="/js/postModal.js?v=2"></script>
+<script src="/js/postModal.js?v=3"></script>
 <script>
     initPostCards(document);
 
@@ -226,7 +226,7 @@
 
         const status = document.createElement('div');
         status.className = 'fl-empty';
-        status.textContent = '불러오는 중...';
+        status.textContent = '불러오는 중…';
         const rows = document.createElement('div');
         const sentinel = document.createElement('div');
         body.replaceChildren(status, rows, sentinel);
@@ -365,13 +365,17 @@
 
         const nicknameText = document.getElementById('nicknameText');
         nicknameText.style.cursor = 'pointer';
-        nicknameText.addEventListener('click', () => {
-            suspendMenu.style.display = suspendMenu.style.display === 'block' ? 'none' : 'block';
-        });
+        // 여닫기와 바깥 클릭은 dropdown.js가 맡는다
+        dropdown.bind(nicknameText, suspendMenu);
 
         document.getElementById('suspendUserBtn').addEventListener('click', async () => {
             const userId = suspendMenu.getAttribute('data-user-id');
-            const duration = document.getElementById('suspendDuration').value;
+            const durationSelect = document.getElementById('suspendDuration');
+            const duration = durationSelect.value;
+            const label = durationSelect.options[durationSelect.selectedIndex].text;
+            // 신고 상세 화면의 정지처럼 확인을 거친다. 메뉴에서 버튼 하나만 누르면 바로 정지되던 것을 막는다
+            dropdown.close(suspendMenu);
+            if (!(await confirmDialog(`이 유저를 ${label} 정지하시겠습니까?`, { okText: '정지', danger: true }))) return;
 
             try {
                 const response = await fetch(`/api/users/suspend/${userId}?duration=${duration}`, {
@@ -396,26 +400,18 @@
     // 더보기 메뉴 → 신고 모달
     document.addEventListener('DOMContentLoaded', () => {
         const moreBtn = document.getElementById('profileMoreBtn');
-        const dropdown = document.getElementById('profileMoreDropdown');
+        const moreMenu = document.getElementById('profileMoreDropdown');
         const modal = document.getElementById('reportModal');
-        if (!moreBtn || !dropdown || !modal) return;
+        if (!moreBtn || !moreMenu || !modal) return;
 
         const reasonSelect = document.getElementById('reportReason');
         const detailInput = document.getElementById('reportDetail');
         const submitBtn = document.getElementById('reportSubmit');
         const targetUserId = document.getElementById('profileUserId').value;
 
-        const closeDropdown = () => { dropdown.style.display = 'none'; };
-
-        moreBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // 바깥을 누르면 닫힌다 (헤더 메뉴와 같은 동작)
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !moreBtn.contains(e.target)) closeDropdown();
-        });
+        // 여닫기와 바깥 클릭은 dropdown.js가 맡는다
+        dropdown.bind(moreBtn, moreMenu);
+        const closeDropdown = () => dropdown.close(moreMenu);
 
         const closeModal = () => { modal.style.display = 'none'; };
 

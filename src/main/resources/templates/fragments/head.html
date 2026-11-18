@@ -6,7 +6,9 @@
          그러면 style.css의 좁은 화면 규칙(max-width)이 휴대폰에서 켜지지 않는다.
          확대를 막는 maximum-scale은 넣지 않는다. 글씨를 키워 봐야 하는 사람이 볼 수 없게 된다. -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 휴대폰 주소창 색. 없으면 밝은 주소창이 어두운 배경(style.css의 --page-bg)과 끊겨 보인다. 배경색을 바꾸면 같이 바꾼다 -->
+    <meta name="theme-color" content="#0a0c10">
     <title>Outplanetton</title>
     <!-- style.css를 고치면 v를 올린다. 브라우저에 남은 옛 CSS가 새 마크업과 어긋나지 않게 한다 -->
-    <link rel="stylesheet" th:href="@{/css/style.css?v=2}">
+    <link rel="stylesheet" th:href="@{/css/style.css?v=3}">
 </head>

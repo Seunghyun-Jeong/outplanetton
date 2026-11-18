@@ -21,7 +21,7 @@
     </div>
 
     <!-- 2. 내용 작성 -->
-    <textarea id="content" rows="4" placeholder="문구를 입력하세요..." required th:maxlength="${T(com.example.sns.entity.Post).MAX_CONTENT_LENGTH}"></textarea>
+    <textarea id="content" rows="4" placeholder="문구를 입력하세요…" aria-label="문구" required th:maxlength="${T(com.example.sns.entity.Post).MAX_CONTENT_LENGTH}"></textarea>
 
     <!-- 3. 업로드 -->
     <button type="button" id="submitPostBtn" class="btn login-btn post-upload-btn">업로드</button>
@@ -50,7 +50,8 @@
     });
 
     // 업로드
-    document.getElementById('submitPostBtn').addEventListener('click', async () => {
+    const submitBtn = document.getElementById('submitPostBtn');
+    submitBtn.addEventListener('click', async () => {
         if (!fileInput.files[0]) {
             showToast('사진을 선택해주세요.', 'error');
             return;
@@ -66,6 +67,8 @@
         formData.append('content', content);
         formData.append('image', fileInput.files[0]);
 
+        // 올리는 동안 다시 누르면 같은 글이 두 번 올라간다. 실패했을 때만 다시 누를 수 있게 한다
+        submitBtn.disabled = true;
         try {
             const response = await fetch('/api/posts', {
                 method: 'POST',
@@ -85,10 +88,12 @@
                 window.location.href = '/';
             } else {
                 showToast(data.message || '게시글 등록에 실패했습니다.', 'error');
+                submitBtn.disabled = false;
             }
         } catch (error) {
             console.error('게시글 등록 실패:', error);
             showToast('서버 오류로 게시글 등록에 실패했습니다.', 'error');
+            submitBtn.disabled = false;
         }
     });
 

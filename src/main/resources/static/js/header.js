@@ -253,20 +253,9 @@
     const dropdownMenu = document.getElementById('dropdownMenu');
     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 
-    // 햄버거 메뉴 열고 닫기
+    // 햄버거 메뉴 열고 닫기. 바깥 클릭과 다른 드롭다운과의 관계는 dropdown.js가 맡는다
     if (hamburgerBtn && dropdownMenu) {
-      hamburgerBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-      });
-
-      // 메뉴 바깥을 누르면 닫는다
-      document.addEventListener('click', (e) => {
-        if (dropdownMenu.style.display !== 'block') return;
-        if (!dropdownMenu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-          dropdownMenu.style.display = 'none';
-        }
-      });
+      dropdown.bind(hamburgerBtn, dropdownMenu);
     }
 
     // 로그아웃: 쿠키를 만료시키고 메인으로 보낸다.

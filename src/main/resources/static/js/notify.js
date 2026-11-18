@@ -6,6 +6,9 @@
       c = document.createElement('div');
       c.id = 'toastContainer';
       c.className = 'toast-container';
+      // 화면 읽기 프로그램이 새 토스트를 읽게 한다. 하던 말을 끊지 않도록 polite로 둔다
+      c.setAttribute('role', 'status');
+      c.setAttribute('aria-live', 'polite');
       document.body.appendChild(c);
     }
     return c;

@@ -1,22 +1,28 @@
 (function () {
   const input = document.getElementById('searchInput');
-  const dropdown = document.getElementById('searchDropdown');
-  if (!input || !dropdown) return;
+  const panel = document.getElementById('searchDropdown');
+  if (!input || !panel) return;
+  const box = input.closest('.search-box');
 
   let timer = null;
   let lastQuery = '';
 
+  // 여닫기는 dropdown.js가 맡는다. 다른 드롭다운이 열리면 이것이 닫히고, 검색창을 누르는 것은 바깥이 아니다
+  function show() {
+    dropdown.open(panel, { inside: box });
+  }
+
   function close() {
-    dropdown.style.display = 'none';
+    dropdown.close(panel);
   }
 
   function renderEmpty(message) {
-    dropdown.innerHTML = '';
+    panel.innerHTML = '';
     const empty = document.createElement('div');
     empty.className = 'search-empty';
     empty.textContent = message;
-    dropdown.appendChild(empty);
-    dropdown.style.display = 'block';
+    panel.appendChild(empty);
+    show();
   }
 
   function buildUserRow(u) {
@@ -79,25 +85,25 @@
       return;
     }
 
-    dropdown.innerHTML = '';
+    panel.innerHTML = '';
 
     if (users.length > 0) {
       const head = document.createElement('div');
       head.className = 'search-section';
       head.textContent = '계정';
-      dropdown.appendChild(head);
-      users.forEach(u => dropdown.appendChild(buildUserRow(u)));
+      panel.appendChild(head);
+      users.forEach(u => panel.appendChild(buildUserRow(u)));
     }
 
     if (tags.length > 0) {
       const head = document.createElement('div');
       head.className = 'search-section';
       head.textContent = '해시태그';
-      dropdown.appendChild(head);
-      tags.forEach(t => dropdown.appendChild(buildTagRow(t)));
+      panel.appendChild(head);
+      tags.forEach(t => panel.appendChild(buildTagRow(t)));
     }
 
-    dropdown.style.display = 'block';
+    show();
   }
 
   async function doSearch(q) {
@@ -126,8 +132,8 @@
   });
 
   input.addEventListener('focus', () => {
-    if (input.value.trim() !== '' && dropdown.innerHTML !== '') {
-      dropdown.style.display = 'block';
+    if (input.value.trim() !== '' && panel.innerHTML !== '') {
+      show();
     }
   });
 
@@ -135,11 +141,8 @@
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { close(); input.blur(); return; }
     if (e.key !== 'Enter') return;
-    const first = dropdown.querySelector('.search-row');
+    const first = panel.querySelector('.search-row');
     if (first) first.dispatchEvent(new MouseEvent('mousedown'));
   });
 
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-box')) close();
-  });
 })();
