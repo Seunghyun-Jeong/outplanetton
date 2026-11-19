@@ -49,6 +49,7 @@
 
 <script src="/js/postCards.js"></script>
 <script src="/js/feedList.js"></script>
+<script src="/js/cardStars.js"></script>
 <script src="/js/postModal.js?v=3"></script>
 <script>
   // 무한 스크롤 페이지는 브라우저의 스크롤 복원을 끈다.
@@ -81,6 +82,10 @@
       loading: document.getElementById('feedLoading'),
       params: feedParams
     });
+
+    // 헤더 밑으로 빠지는 카드를 위로 날려 보내면 유성이 되어 돌아와 배경 별로 앉는다.
+    // 프로필 격자에는 켜지 않는다(한 줄 세 장이 같이 날아가 어수선하다)
+    cardsToStars(container);
 
     // 피드를 첫 묶음으로 새로 받는다. 탭을 바꿀 때와 새 게시물 버튼을 눌렀을 때 같이 쓴다.
     function reloadFeed() {

@@ -23,6 +23,9 @@
    */
   const PARALLAX_RATIO = 0.05;
 
+  // 스크롤로 하늘 띠를 위로 민 양(px, 0 이상 화면 높이 미만). bindParallax가 바꾸고 starfieldAddStar가 읽는다.
+  let skyOffset = 0;
+
   /*
    * 이스터에그. 페이지를 열 때마다 하나를 골라 배경 어딘가에 놓는다.
    * 이름표도 연결선도 그리지 않는다. 선을 그으면 별자리가 아니라 도형이 되고,
@@ -58,6 +61,23 @@
 
   function pick(list) {
     return list[Math.floor(Math.random() * list.length)];
+  }
+
+  // 별 한 개. 배경 별, 별자리 별, 피드 카드가 된 별이 모두 이것으로 만든다. x, y는 놓일 상자 안의 %.
+  function makeStar(x, y, size, opacity) {
+    const star = document.createElement('i');
+    star.style.setProperty('--x', x.toFixed(2) + '%');
+    star.style.setProperty('--y', y.toFixed(2) + '%');
+    star.style.setProperty('--s', size.toFixed(2) + 'px');
+    star.style.setProperty('--o', opacity.toFixed(2));
+    return star;
+  }
+
+  // 지연을 흩어 놓아야 한꺼번에 깜빡이지 않는다
+  function setTwinkle(star, period, delay) {
+    star.classList.add('twinkle');
+    star.style.setProperty('--tt', period.toFixed(1) + 's');
+    star.style.setProperty('--td', delay.toFixed(1) + 's');
   }
 
   /*
@@ -105,19 +125,9 @@
     }
 
     data.stars.forEach(([sx, sy], i) => {
-      const star = document.createElement('i');
       // 일반 별보다 크고 밝아야 하나의 덩어리로 읽혀 모양을 알아볼 수 있다
-      star.style.setProperty('--x', (sx * 100).toFixed(2) + '%');
-      star.style.setProperty('--y', (sy * 100).toFixed(2) + '%');
-      star.style.setProperty('--s', rand(1.8, 3).toFixed(2) + 'px');
-      star.style.setProperty('--o', rand(0.5, 0.85).toFixed(2));
-
-      if (twinkling.has(i)) {
-        star.classList.add('twinkle');
-        star.style.setProperty('--tt', rand(3.5, 7).toFixed(1) + 's');
-        star.style.setProperty('--td', rand(0, 10).toFixed(1) + 's');
-      }
-
+      const star = makeStar(sx * 100, sy * 100, rand(1.8, 3), rand(0.5, 0.85));
+      if (twinkling.has(i)) setTwinkle(star, rand(3.5, 7), rand(0, 10));
       box.appendChild(star);
     });
 
@@ -137,14 +147,9 @@
     const stars = document.createDocumentFragment();
 
     for (let i = 0; i < STAR_COUNT; i++) {
-      const star = document.createElement('i');
       // 대부분 작고 흐리게. 글을 읽는 데 방해가 되면 안 된다.
       const size = Math.random() < 0.82 ? rand(1, 1.6) : rand(1.8, 2.6);
-
-      star.style.setProperty('--x', rand(0, 100).toFixed(2) + '%');
-      star.style.setProperty('--y', rand(0, 100).toFixed(2) + '%');
-      star.style.setProperty('--s', size.toFixed(2) + 'px');
-      star.style.setProperty('--o', rand(0.12, 0.55).toFixed(2));
+      const star = makeStar(rand(0, 100), rand(0, 100), size, rand(0.12, 0.55));
 
       // 떠다님: 아주 느리게, 방향은 별마다 다르게
       star.style.setProperty('--mx', rand(-18, 18).toFixed(1) + 'px');
@@ -152,12 +157,8 @@
       star.style.setProperty('--dt', rand(40, 110).toFixed(1) + 's');
       star.style.setProperty('--dd', rand(-40, 0).toFixed(1) + 's');
 
-      // 일부만 반짝인다. 지연을 흩어 놓아야 한꺼번에 깜빡이지 않는다.
-      if (Math.random() < TWINKLE_RATIO) {
-        star.classList.add('twinkle');
-        star.style.setProperty('--tt', rand(3, 7).toFixed(1) + 's');
-        star.style.setProperty('--td', rand(0, 14).toFixed(1) + 's');
-      }
+      // 일부만 반짝인다
+      if (Math.random() < TWINKLE_RATIO) setTwinkle(star, rand(3, 7), rand(0, 14));
 
       stars.appendChild(star);
     }
@@ -189,6 +190,35 @@
     layer.appendChild(strip);
     document.body.insertBefore(layer, document.body.firstChild);
     bindParallax(layer, strip);
+
+    window.starfieldAddStar = function (clientX, clientY) {
+      return addStarAt(layer, strip, clientX, clientY);
+    };
+  }
+
+  /*
+   * 화면 좌표에 별 하나를 켠다. 피드 카드가 날아가 별이 될 때 쓴다(cardStars.js).
+   * 하늘 띠 안에 넣으므로 다른 별과 같이 패럴랙스로 흘러가고, 그 장이 되감겨 새로 채워질 때 같이 사라진다.
+   * 카드 별은 별자리 별처럼 크고 밝게 둔다. 일반 별(최대 2.6px, 밝기 0.55)과 섞이면 알아볼 수 없다.
+   */
+  function addStarAt(layer, strip, clientX, clientY) {
+    const width = layer.clientWidth;
+    const cycle = layer.clientHeight;
+    if (width <= 0 || cycle <= 0) return null;
+
+    // 띠 위의 자리 = 화면 위치 + 민 양. 첫 장을 넘어가면 둘째 장에 놓는다
+    let top = clientY + skyOffset;
+    let sky = strip.firstElementChild;
+    if (top >= cycle) {
+      top -= cycle;
+      sky = strip.lastElementChild;
+    }
+
+    const star = makeStar(clientX / width * 100, top / cycle * 100, rand(2.4, 3), rand(0.75, 0.9));
+    star.classList.add('card-star');
+    setTwinkle(star, rand(4, 7), rand(1, 6));
+    sky.appendChild(star);
+    return star;
   }
 
   /*
@@ -200,7 +230,6 @@
     // 움직이는 배경을 꺼둔 사용자에게는 스크롤 연동도 걸지 않는다
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    let offset = 0;
     let lastY = window.scrollY;
     let ticking = false;
 
@@ -211,26 +240,26 @@
       if (cycle <= 0) return;
 
       const y = window.scrollY;
-      offset += (y - lastY) * PARALLAX_RATIO;
+      skyOffset += (y - lastY) * PARALLAX_RATIO;
       lastY = y;
 
       // 위 장이 화면 밖으로 다 나갔으면 아래로 돌려 보내며 새로 채운다.
       // 형제 순서가 곧 위아래 위치라 DOM에서 옮기기만 하면 된다. 같은 프레임이라 화면은 그대로.
-      while (offset >= cycle) {
+      while (skyOffset >= cycle) {
         const top = strip.firstElementChild;
         fillSky(top, strip.lastElementChild);
         strip.appendChild(top);
-        offset -= cycle;
+        skyOffset -= cycle;
       }
       // 위로 굴려 아래 장이 다 나갔으면 반대로
-      while (offset < 0) {
+      while (skyOffset < 0) {
         const bottom = strip.lastElementChild;
         fillSky(bottom, strip.firstElementChild);
         strip.prepend(bottom);
-        offset += cycle;
+        skyOffset += cycle;
       }
 
-      strip.style.transform = 'translate3d(0, ' + (-offset).toFixed(1) + 'px, 0)';
+      strip.style.transform = 'translate3d(0, ' + (-skyOffset).toFixed(1) + 'px, 0)';
     }
     // 스크롤 이벤트마다 스타일을 만지지 않고 프레임당 한 번만 반영한다
     window.addEventListener('scroll', function () {
