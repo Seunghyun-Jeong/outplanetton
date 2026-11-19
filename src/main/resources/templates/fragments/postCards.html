@@ -31,6 +31,12 @@
      th:attr="data-post-id=${post.id}, data-created-at=${post.createdAt}"
      th:onclick="'openPostModal(' + ${post.id} + ')'"
      style="cursor:pointer;">
+  <!--
+    바깥 상자(.post-summary)는 목록 안의 자리만 잡고, 카드 모양은 안쪽 .post-card가 갖는다.
+    메인 피드에서 카드를 위로 날릴 때 안쪽만 움직인다(cardStars.js). 바깥 상자는 제자리라서
+    날아가는 도중에도 그 자리가 얼마나 보이는지 IntersectionObserver로 잴 수 있고, 그래서 도중에 되돌릴 수 있다.
+  -->
+  <div class="post-card">
 
   <!-- 화면 밖 사진은 가까워질 때 받는다. 카드는 aspect-ratio로 자리를 먼저 잡아서 늦게 와도 밀리지 않는다 -->
   <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" class="post-image" alt="게시물 이미지" loading="lazy" />
@@ -53,6 +59,7 @@
 
   <div class="post-time" th:attr="data-time=${post.createdAt}"></div>
 
+  </div>
 </div>
 </body>
 </html>

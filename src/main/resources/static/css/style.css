@@ -214,17 +214,28 @@ button:disabled {
     margin: 0 auto;
 }
 
+/* 바깥 상자는 목록 안의 자리만 잡는다. 카드 모양은 안쪽 .post-card에 둔다(이유는 postCards.html의 card 조각).
+ * 프로필 격자는 같은 줄 카드를 줄 높이만큼 늘리므로, 안쪽이 바깥 높이를 다 채우게 flex로 잇는다.
+ * min-width: 0이 없으면 격자 칸이 한 줄짜리 캡션 폭보다 좁아지지 않아 375px 프로필 2열이 화면 밖으로 15px 넘친다
+ * (전에는 바깥 상자의 overflow: hidden이 같은 일을 했다) */
 .post-summary {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.post-card {
+    flex: 1 1 auto;
     background-color: white;
     padding: 0;
     overflow: hidden;
     border-radius: 10px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    cursor: pointer;
     transition: box-shadow 0.2s ease;
 }
 
-.post-summary:hover {
+.post-card:hover {
     box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 10px 28px rgba(0,0,0,0.14);
 }
 
@@ -3333,10 +3344,13 @@ body > h2,
  */
 
 /* 날아가 화면 밖에 있는 카드. 자리(레이아웃)는 그대로 두어 다음 카드와 무한 스크롤 기준값이 흔들리지 않고,
- * 안 보이는 카드가 눌리지 않게만 한다 */
+ * 안 보이는 카드가 눌리지 않게만 한다. 움직이고 사라지는 것은 안쪽 .post-card이고, 바깥 상자는 자리를 재는 데 쓴다 */
 .post-summary.thrown {
-    opacity: 0;
     pointer-events: none;
+}
+
+.post-summary.thrown > .post-card {
+    opacity: 0;
 }
 
 /* 유성은 배경 별과 같은 층(-1)에 그린다. body 끝에 붙어 .starfield보다 뒤에 오므로 별 위, 카드 아래다.
