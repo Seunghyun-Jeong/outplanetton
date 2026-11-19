@@ -18,7 +18,7 @@
 
             <div id="profileSuspendMenu" th:if="${currentUserRole == 'ADMIN' and profileUsername != currentUsername}"
                  th:attr="data-user-id=${profileUserId}"
-                 style="display: none; position: absolute; top: 100%; left: 0; margin-top: 8px; z-index: 10; white-space: nowrap; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                 style="display: none;">
                 <label for="suspendDuration">이용정지 기간:</label>
                 <select id="suspendDuration">
                     <option value="1d">1일</option>
@@ -74,8 +74,8 @@
         </div>
     </div>
 
-    <div th:if="${profileSuspended}" class="profile-suspended-notice"
-         style="padding: 60px 20px; text-align: center; color: #888; font-size: 1.2em;">
+    <div th:if="${profileSuspended}" class="text-subtle profile-suspended-notice"
+         style="padding: 60px 20px; text-align: center; font-size: 1.2em;">
         이용이 정지된 유저입니다.
     </div>
 
@@ -103,7 +103,7 @@
     <div class="img-modal-content">
         <h3 style="margin: 0;">닉네임 수정</h3>
         <input type="text" id="nicknameInput" th:value="${profileUsername}" aria-label="닉네임"
-               style="padding: 8px 10px; font-size: 16px; width: 220px; border: 1px solid #ccc; border-radius: 6px;" />
+ />
         <div style="display: flex; gap: 10px;">
             <button id="saveNicknameBtn" class="btn login-btn">저장</button>
             <button id="cancelNicknameBtn" class="btn">취소</button>

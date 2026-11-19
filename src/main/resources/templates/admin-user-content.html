@@ -9,7 +9,7 @@
     <h2 style="margin-bottom: 4px;">
         <span th:text="${targetUsername}">username</span> 님의 콘텐츠
     </h2>
-    <p style="color: #888; font-size: 14px; margin-bottom: 8px;">
+    <p class="text-subtle" style="font-size: 14px; margin-bottom: 8px;">
         정지 사유 확인용 — 관리자만 볼 수 있는 페이지입니다.
     </p>
 
@@ -19,7 +19,7 @@
       날짜는 정지 근거를 보는 화면이라 상대 시간이 아니라 정지 유저 목록과 같은 절대 시각으로 찍는다.
     -->
     <h3 style="margin-top: 20px;">작성한 글</h3>
-    <div th:if="${posts.isEmpty()}" style="color: #888; padding: 20px 0;">작성한 글이 없습니다.</div>
+    <div class="text-subtle" th:if="${posts.isEmpty()}" style="padding: 20px 0;">작성한 글이 없습니다.</div>
     <div th:each="post : ${posts}" class="admin-list-item report-row">
         <div class="report-row-main">
             <span class="report-sub" th:if="${post.updatedAt == null}"
@@ -34,7 +34,7 @@
     </div>
 
     <h3 style="margin-top: 32px;">작성한 댓글</h3>
-    <div th:if="${comments.isEmpty()}" style="color: #888; padding: 20px 0;">작성한 댓글이 없습니다.</div>
+    <div class="text-subtle" th:if="${comments.isEmpty()}" style="padding: 20px 0;">작성한 댓글이 없습니다.</div>
     <div th:each="comment : ${comments}" class="admin-list-item report-row">
         <div class="report-row-main">
             <span class="report-sub"

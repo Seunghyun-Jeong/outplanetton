@@ -16,8 +16,8 @@
            th:classappend="${tab == 'handled'} ? 'active' : ''">처리 완료</a>
     </div>
 
-    <div th:if="${reportGroups.isEmpty()}"
-         style="color: #9aa2ad; padding: 40px 0; text-align: center;"
+    <div class="text-subtle" th:if="${reportGroups.isEmpty()}"
+         style="padding: 40px 0; text-align: center;"
          th:text="${tab == 'handled'} ? '처리한 신고가 없습니다.' : '대기 중인 신고가 없습니다.'">
     </div>
 

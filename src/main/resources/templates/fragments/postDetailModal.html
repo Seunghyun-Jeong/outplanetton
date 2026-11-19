@@ -16,8 +16,8 @@
 
         <!-- 왼쪽: 이미지 전용 -->
         <div class="post-detail-media">
-            <div th:if="${post.suspended}" class="suspended-notice"
-                 style="color:#aaa; text-align:center; padding:0 20px;">
+            <div th:if="${post.suspended}" class="text-subtle suspended-notice"
+                 style="text-align:center; padding:0 20px;">
                 이용이 정지된 유저입니다.
             </div>
             <img th:unless="${post.suspended}" th:if="${post.imageUrl != null}"

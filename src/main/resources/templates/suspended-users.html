@@ -8,8 +8,8 @@
 <div class="feed-container" style="margin-top: 30px;">
     <h2 style="margin-bottom: 4px;">정지 유저 목록</h2>
 
-    <div th:if="${suspendedUsers.isEmpty()}"
-         style="color: #888; padding: 40px 0; text-align: center;">
+    <div class="text-subtle" th:if="${suspendedUsers.isEmpty()}"
+         style="padding: 40px 0; text-align: center;">
         현재 정지된 유저가 없습니다.
     </div>
 

@@ -1,5 +1,8 @@
 /* 기존 CSS 유지 + 필요한 부분만 수정/추가 */
+/* 로고 글꼴. 로고는 이 프로젝트의 얼굴이라 디자인 시스템을 바꿔도 그대로 둔다 */
 @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+/* 한글까지 Inter와 같은 결로 맞추려고 Pretendard(Inter 기반 한글 글꼴)를 쓴다. Linear 문서가 권하는 Inter는 한글이 없어 한글만 시스템 글꼴로 떨어진다 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
 
 *,
 *::before,
@@ -18,21 +21,64 @@
 }
 
 /*
- * 페이지 배경색은 한 곳에서만 정의한다.
- * 헤더 프로스트가 같은 색의 반투명이어야 하는데,
- * 값을 두 군데 적어두면 배경을 바꿀 때 한쪽만 고쳐져 어긋난다.
+ * 색, 글자, 둥글기의 주인. 화면 규칙은 여기 변수만 쓰고 색 값을 직접 적지 않는다.
+ * 값은 Linear 디자인 시스템(brand-design 스킬의 linear.app)을 따른다.
+ * 예전에는 흰 테마 위에 다크 덮어쓰기를 따로 붙여 같은 요소를 두 번 칠했고, 색이 96종까지 늘어
+ * 흰 판과 검은 판이 한 화면에 섞였다. 바탕은 어두운 한 벌로만 둔다.
  */
 :root {
-    --page-bg: 230 232 235;
+    /* 헤더 프로스트가 같은 색의 반투명이어야 해서 바탕은 rgb 숫자로 둔다 */
+    --page-bg: 1 1 2;
+    --canvas: rgb(var(--page-bg));
+    /* 바탕 위로 한 단계씩 떠오르는 판. 그림자 대신 이 밝기 차이로 위계를 만든다 */
+    --surface-1: #0f1011;
+    --surface-2: #141516;
+    --surface-3: #18191a;
+    --surface-4: #1f2023;
+    --hairline: #23252a;
+    --hairline-strong: #34343a;
+
+    --ink: #f7f8f8;
+    --ink-muted: #d0d6e0;
+    --ink-subtle: #8a8f98;
+    --ink-tertiary: #62666d;
+    /* 밝은 반전 버튼(팔로우, 내 말풍선) 위의 글자 */
+    --inverse-ink: #010102;
+
+    /* 강조색은 하나만. 주요 버튼, 초점, 링크에만 쓰고 판을 칠하지 않는다 */
+    --primary: #5e6ad2;
+    --primary-hover: #828fff;
+    --primary-focus: #5e69d1;
+    --primary-tint: rgba(94, 106, 210, 0.16);
+    --link: #828fff;
+    /* 좋아요, 삭제, 오류처럼 의미가 있는 곳에만 */
+    --danger: #eb5757;
+    --danger-strong: #d04545;
+    --danger-tint: rgba(235, 87, 87, 0.14);
+    --success: #27a644;
+    --success-tint: rgba(39, 166, 68, 0.16);
+    /* 배경 별과 유성 머리. 판(surface)이 아니라 빛이라 따로 둔다. 판 색을 바꿔도 별은 그대로여야 한다 */
+    --starlight: #fff;
+
+    --font: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 9999px;
+
     /* 헤더가 문서 흐름 안에서 차지하는 높이. 화면 높이에 맞춰야 하는 요소가 여기서 뺀다 */
     --header-gap: 20px;
     --header-height: 60px;
+    color-scheme: dark;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    /* 흰 카드가 떠 보이도록 배경만 한 톤 낮춘다 (무채색 컨셉) */
-    background-color: rgb(var(--page-bg));
+    font-family: var(--font);
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--canvas);
     margin: 0;
     /* 하단에 고정된 피드 탭이 마지막 게시글을 가리지 않도록 여백을 둔다 */
     padding: 0 20px 90px;
@@ -64,18 +110,16 @@ body {
 .header-bar {
     position: relative;
     z-index: 2;
-    background-color: white;
+    background-color: var(--surface-1);
     padding: 0 30px;
     height: var(--header-height);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 30px;
+    border-radius: var(--radius-pill);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     font-weight: 600;
     font-size: 16px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 /* flex의 space-between은 검색창을 "로고와 오른쪽 메뉴 사이 빈칸"의 가운데에 둔다.
@@ -114,7 +158,7 @@ body {
     display: flex;
     align-items: center;
     font-size: 14px;
-    color: #333;
+    color: var(--ink);
     gap: 12px;
 }
 
@@ -129,23 +173,24 @@ body {
 #hamburgerBtn {
     background: none;
     border: none;
-    padding: 4px 8px;
-    color: #262626;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--ink);
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
 h2 {
-    color: #333;
+    color: var(--ink);
     text-align: center;
 }
 
 #signupForm, #loginForm, #postForm {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.08);
+    background-color: var(--surface-1);
+    border: 1px solid var(--hairline);
+    padding: 24px;
+    border-radius: var(--radius-lg);
     max-width: 400px;
     margin: auto;
 }
@@ -159,21 +204,53 @@ label {
 input[type="text"],
 input[type="password"] {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 10px 12px;
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-md);
     margin-bottom: 15px;
 }
 
+/* 입력칸은 판보다 한 단계 깊게 둬서 "여기에 쓴다"가 보이게 한다 */
+input,
+textarea,
+select {
+    background-color: var(--canvas);
+    color: var(--ink);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--ink-tertiary);
+}
+
+/* 초점 표시는 강조색 하나로 통일한다. 마우스로 누를 때는 보이지 않고 키보드로 옮길 때만 보인다 */
+:focus-visible {
+    outline: 2px solid var(--primary-focus);
+    outline-offset: 2px;
+}
+
+input:focus,
+textarea:focus {
+    border-color: var(--primary-focus);
+    outline: none;
+}
+
+/* 기본 버튼은 회색 판(Linear의 보조 버튼). 배경을 정하지 않으면 브라우저 기본 회색 버튼이 섞여 나온다 */
 button {
     font-family: inherit;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 14px;
     cursor: pointer;
-    border-radius: 4px;
-    border: none;
-    padding: 10px 15px;
-    transition: background-color 0.2s ease;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--hairline);
+    background-color: var(--surface-2);
+    color: var(--ink);
+    padding: 8px 14px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+button:hover {
+    background-color: var(--surface-3);
 }
 
 /* 요청 중이라 잠근 버튼에 누를 수 있는 손 모양이 남지 않게 한다 */
@@ -201,19 +278,37 @@ button:disabled {
 }
 
 .login-btn {
-    color: #262626;
+    color: var(--ink);
 }
 
 .login-btn:hover {
-    color: #6b7280;
+    color: var(--ink-muted);
 }
 
 .logout-btn {
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 .logout-btn:hover {
-    color: #262626;
+    color: var(--ink);
+}
+
+/* 주요 동작은 화면마다 하나만 강조색으로 채운다. 강조색이 여러 곳에 있으면 무엇이 주인지 흐려진다.
+   업로드 버튼은 login-btn 클래스도 달고 있어서 그 "배경 없음"보다 뒤에 둔다 */
+#loginSubmit,
+#signupSubmit,
+.post-upload-btn {
+    width: 100%;
+    background-color: var(--primary);
+    border-color: transparent;
+    color: #fff;
+}
+
+#loginSubmit:hover,
+#signupSubmit:hover,
+.post-upload-btn:hover {
+    background-color: var(--primary-hover);
+    color: #fff;
 }
 
 .logo-link {
@@ -221,13 +316,13 @@ button:disabled {
     font-size: 32px;
     font-weight: 400;
     letter-spacing: 0.5px;
-    color: #262626;
+    color: var(--ink);
     text-decoration: none;
 }
 
 .username {
     font-weight: 600;
-    color: #262626;
+    color: var(--ink);
     text-decoration: none;
     font-size: 16px;
     align-self: center;
@@ -254,10 +349,10 @@ button:disabled {
 
 .post-card {
     flex: 1 1 auto;
-    background-color: white;
+    background-color: var(--surface-1);
     padding: 0;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     transition: box-shadow 0.2s ease;
 }
@@ -273,7 +368,7 @@ button:disabled {
     gap: 6px;
     padding: 10px 14px 4px;
     font-size: 14px;
-    color: #262626;
+    color: var(--ink);
 }
 
 .post-like-state {
@@ -293,7 +388,7 @@ button:disabled {
 .post-caption {
     padding: 2px 14px;
     font-size: 14px;
-    color: #262626;
+    color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -306,7 +401,7 @@ button:disabled {
 
 .post-time {
     font-size: 12px;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 /* 피드 카드에서만 시간에 여백 (모달 시간에는 적용 안 함) */
@@ -335,14 +430,14 @@ button:disabled {
 
 .ic-heart path {
     fill: none;
-    stroke: #262626;
+    stroke: var(--hairline-strong);
     stroke-width: 2;
     stroke-linejoin: round;
 }
 
 .liked .ic-heart path {
-    fill: #ed4956;
-    stroke: #ed4956;
+    fill: var(--danger);
+    stroke: var(--danger);
 }
 
 .ic-comment {
@@ -351,7 +446,7 @@ button:disabled {
 
 .ic-comment path {
     fill: none;
-    stroke: #262626;
+    stroke: var(--hairline-strong);
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -383,12 +478,12 @@ button:disabled {
 
 .post-summary p {
     margin: 3px 0;
-    color: #555;
+    color: var(--ink-muted);
     font-size: 14px;
 }
 
 .post-excerpt {
-    color: #555;
+    color: var(--ink-muted);
     font-size: 14px;
     margin-top: 8px;
     display: -webkit-box;
@@ -405,7 +500,7 @@ button:disabled {
     aspect-ratio: 1 / 1;
     object-fit: cover;
     display: block;
-    background: #fafafa;
+    background: var(--surface-2);
     /* 흰 배경 사진도 경계가 보이도록 얇은 테두리 */
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
@@ -432,21 +527,21 @@ button:disabled {
 }
 
 .image-select-area {
-    border: 1px dashed #ccc;
-    border-radius: 10px;
+    border: 1px dashed var(--hairline-strong);
+    border-radius: var(--radius-md);
     min-height: 260px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     overflow: hidden;
-    background: #fafafa;
+    background: var(--surface-2);
     transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .image-select-area:hover {
-    border-color: #6366f1;
-    background: #f0f8ff;
+    border-color: var(--primary);
+    background: var(--primary-tint);
 }
 
 .image-preview {
@@ -460,26 +555,26 @@ button:disabled {
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    color: #888;
+    color: var(--ink-subtle);
     font-size: 15px;
 }
 
 .image-placeholder-icon {
     font-size: 34px;
-    color: #bbb;
+    color: var(--ink-tertiary);
     line-height: 1;
 }
 
 .image-placeholder small {
     font-size: 12px;
-    color: #aaa;
+    color: var(--ink-subtle);
 }
 
 .post-create-container textarea {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-md);
     margin-top: 14px;
     font-family: inherit;
     font-size: 15px;
@@ -487,17 +582,16 @@ button:disabled {
 }
 
 .post-upload-btn {
-    width: 100%;
     margin-top: 14px;
-    border-radius: 8px;
     padding: 12px;
     font-size: 15px;
 }
 
-/* 올리는 중. 글자 버튼이라 글자색으로 쓸 수 없음을 보인다 */
+/* 올리는 중. 채운 버튼이라 흐리게 해서 누를 수 없음을 보인다 */
 .post-upload-btn:disabled,
 .post-upload-btn:disabled:hover {
-    color: #b0b0b0;
+    background-color: var(--primary);
+    opacity: 0.5;
 }
 
 .modal-backdrop {
@@ -522,8 +616,8 @@ button:disabled {
 }
 
 .ce-box {
-    background: #fff;
-    border-radius: 14px;
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
     width: 420px;
     max-width: 90vw;
     padding: 20px;
@@ -534,7 +628,7 @@ button:disabled {
     font-weight: 700;
     font-size: 16px;
     margin-bottom: 12px;
-    color: #262626;
+    color: var(--ink);
 }
 
 .ce-input {
@@ -543,15 +637,15 @@ button:disabled {
     padding: 10px 12px;
     font-size: 14px;
     line-height: 1.5;
-    border: 1px solid #dbdbdb;
-    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
     resize: vertical;
     min-height: 70px;
 }
 
 .ce-input:focus {
     outline: none;
-    border-color: #6366f1;
+    border-color: var(--primary);
 }
 
 .ce-actions {
@@ -563,7 +657,7 @@ button:disabled {
 
 .ce-btn {
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     padding: 8px 16px;
     font-weight: 600;
     font-size: 14px;
@@ -571,28 +665,28 @@ button:disabled {
 }
 
 .ce-save {
-    background: #6366f1;
-    color: #fff;
+    background: var(--primary);
+    color: var(--ink);
 }
 
 .ce-save:hover {
-    background: #4f46e5;
+    background: var(--primary-hover);
 }
 
 .ce-cancel {
-    background: #efefef;
-    color: #262626;
+    background: var(--surface-2);
+    color: var(--ink);
 }
 
 .ce-cancel:hover {
-    background: #e0e0e0;
+    background: var(--surface-3);
 }
 
 .modal {
     position: relative;
-    background-color: white;
+    background-color: var(--surface-1);
     padding: 0;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     box-shadow: 0 2px 20px rgba(0,0,0,0.2);
     width: 76vw;
     height: 80vh;
@@ -617,7 +711,7 @@ button:disabled {
 /* 왼쪽: 이미지 전용 (검은 배경에 사진 contain) */
 .post-detail-media {
     width: 62%;
-    background: #000;
+    background: var(--canvas);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -632,7 +726,7 @@ button:disabled {
     flex-direction: column;
     height: 100%;
     min-width: 300px;
-    border-left: 1px solid #efefef;
+    border-left: 1px solid var(--hairline);
 }
 
 /* 닫기 버튼은 모달이 화면을 다 덮는 좁은 화면에서만 보인다. 넓은 화면은 바깥을 누르거나 Esc로 닫는다 */
@@ -679,7 +773,7 @@ button:disabled {
         flex: 1;
         min-height: 0;
         border-left: none;
-        border-top: 1px solid #efefef;
+        border-top: 1px solid var(--hairline);
     }
 
     .modal-close-btn {
@@ -696,7 +790,7 @@ button:disabled {
         border: none;
         border-radius: 50%;
         background: rgba(0, 0, 0, 0.55);
-        color: #fff;
+        color: var(--ink);
         cursor: pointer;
     }
 }
@@ -707,7 +801,7 @@ button:disabled {
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
@@ -716,14 +810,14 @@ button:disabled {
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #efefef;
+    border: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
 .pd-username {
     font-weight: 600;
     font-size: 14px;
-    color: #262626;
+    color: var(--ink);
     cursor: pointer;
 }
 
@@ -737,7 +831,7 @@ button:disabled {
     border: none;
     padding: 4px;
     cursor: pointer;
-    color: #262626;
+    color: var(--ink);
     display: inline-flex;
     align-items: center;
 }
@@ -746,9 +840,9 @@ button:disabled {
     position: absolute;
     right: 0;
     top: calc(100% + 6px);
-    background: #fff;
-    border: 1px solid #efefef;
-    border-radius: 12px;
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     z-index: 10;
@@ -766,25 +860,25 @@ button:disabled {
     text-align: left;
     font-size: 14px;
     font-weight: 500;
-    color: #262626;
+    color: var(--ink);
     cursor: pointer;
 }
 
 .pd-menu-dropdown .btn:not(:last-child) {
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--hairline);
 }
 
 .pd-menu-dropdown .btn:hover {
-    background: #f7f7f7;
+    background: var(--surface-2);
 }
 
 .pd-menu-dropdown .edit-post-btn {
-    color: #6366f1; /* 댓글 수정 버튼과 동일 색상 */
+    color: var(--link); /* 댓글 수정 버튼과 동일 색상 */
     font-weight: 600;
 }
 
 .pd-menu-dropdown .delete-post-btn {
-    color: #ed4956;
+    color: var(--danger);
     font-weight: 600;
 }
 
@@ -810,7 +904,7 @@ button:disabled {
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #efefef;
+    border: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
@@ -822,7 +916,7 @@ button:disabled {
 .pd-row-text {
     font-size: 14px;
     line-height: 1.5;
-    color: #262626;
+    color: var(--ink);
     word-break: break-word;
 }
 
@@ -839,7 +933,7 @@ button:disabled {
     gap: 4px;
     margin-top: 6px;
     font-size: 12px;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 /* 시간·(수정됨)은 글자 중간에서 안 깨지게 */
@@ -863,7 +957,7 @@ button:disabled {
     border: none;
     padding: 2px 6px;
     box-shadow: none;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 12px;
     cursor: pointer;
@@ -872,36 +966,36 @@ button:disabled {
 
 .pd-meta .edit-comment-btn,
 .pd-meta .save-comment-btn {
-    color: #6366f1; /* "게시" 버튼과 동일 색상 */
+    color: var(--link); /* "게시" 버튼과 동일 색상 */
 }
 
 .pd-meta .delete-comment-btn {
-    color: #ed4956;
+    color: var(--danger);
 }
 
 .pd-meta .cancel-edit-btn {
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 /* hover 시 파랑/빨강/회색 알약이 글자보다 크게 채워짐 */
 .pd-meta .edit-comment-btn:hover,
 .pd-meta .save-comment-btn:hover {
-    background-color: #6366f1;
-    color: #fff;
+    background-color: var(--primary);
+    color: var(--ink);
 }
 
 .pd-meta .delete-comment-btn:hover {
-    background-color: #ed4956;
-    color: #fff;
+    background-color: var(--danger);
+    color: var(--ink);
 }
 
 .pd-meta .cancel-edit-btn:hover {
-    background-color: #8e8e8e;
-    color: #fff;
+    background-color: var(--surface-3);
+    color: var(--ink);
 }
 
 .pd-caption-row {
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--hairline);
     margin-bottom: 6px;
     padding-bottom: 14px;
 }
@@ -918,14 +1012,14 @@ button:disabled {
 
 .pd-comment-like .comment-like-count {
     font-size: 12px;
-    color: #262626;
+    color: var(--ink);
 }
 
 /* 내가 좋아요 누른 게시글/댓글은 숫자도 빨간색 */
 .feed-like-btn.liked + .feed-like-count,
 .like-btn.liked + .pd-count,
 .comment-like-btn.liked + .comment-like-count {
-    color: #ed4956;
+    color: var(--danger);
 }
 
 .comment .comment-suspended {
@@ -938,7 +1032,7 @@ button:disabled {
     align-items: center;
     gap: 6px;
     padding: 10px 16px 4px;
-    border-top: 1px solid #efefef;
+    border-top: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
@@ -955,23 +1049,23 @@ button:disabled {
 .pd-count {
     font-weight: 600;
     font-size: 14px;
-    color: #262626;
+    color: var(--ink);
 }
 
 .pd-posttime {
     padding: 4px 16px 10px;
     font-size: 11px;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     text-transform: uppercase;
     flex-shrink: 0;
 }
 
 .delete-post-btn {
-    background-color: red;
-    color: white;
+    background-color: var(--danger);
+    color: var(--ink);
     border: none;
     padding: 8px 15px;
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(255, 0, 0, 0.5);
@@ -979,15 +1073,15 @@ button:disabled {
 }
 
 .delete-post-btn:hover {
-    background-color: #cc0000;
+    background-color: var(--danger-strong);
 }
 
 .edit-post-btn {
-    background-color: #007bff;
-    color: white;
+    background-color: var(--primary);
+    color: var(--ink);
     border: none;
     padding: 8px 15px;
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -995,18 +1089,18 @@ button:disabled {
 }
 
 .edit-post-btn:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-hover);
 }
 
 .comment-form {
     padding: 6px 16px;
-    border-top: 1px solid #efefef;
+    border-top: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
 /* 댓글 칸은 테두리 없이 outline을 지워 두었다. 입력 중인지 보이도록 위 구분선을 진하게 한다 */
 .comment-form:focus-within {
-    border-top-color: #8e8e8e;
+    border-top-color: var(--hairline-strong);
 }
 
 .comment-input-wrapper {
@@ -1030,7 +1124,7 @@ button:disabled {
 .comment-submit-button {
     background: none;
     border: none;
-    color: #6366f1;
+    color: var(--link);
     font-weight: 600;
     font-size: 14px;
     padding: 6px 2px;
@@ -1039,13 +1133,13 @@ button:disabled {
 }
 
 .comment-submit-button:hover {
-    color: #00376b;
+    color: var(--link);
 }
 
 .post-title {
     font-size: 20px;
     font-weight: 600;
-    color: #262626;
+    color: var(--ink);
     margin-bottom: 10px;
     line-height: 1.3;
 }
@@ -1055,7 +1149,7 @@ button:disabled {
     align-items: center;
     gap: 10px;
     font-size: 13px;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     margin-bottom: 20px;
 }
 
@@ -1065,12 +1159,12 @@ button:disabled {
 
 .comment {
     font-size: 14px;
-    color: #262626;
+    color: var(--ink);
 }
 
 .comment-author {
     font-weight: 600;
-    color: #262626;
+    color: var(--ink);
 }
 
 .comment-text {
@@ -1080,11 +1174,11 @@ button:disabled {
 
 .edit-comment-btn,
 .save-comment-btn {
-    background-color: #007bff;
-    color: white;
+    background-color: var(--primary);
+    color: var(--ink);
     border: none;
     padding: 5px 12px;
-    border-radius: 15px;
+    border-radius: var(--radius-lg);
     font-weight: 600;
     font-size: 12px;
     cursor: pointer;
@@ -1099,16 +1193,16 @@ button:disabled {
 
 .edit-comment-btn:hover,
 .save-comment-btn:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-hover);
 }
 
 .cancel-edit-btn {
     display: none;
-    background-color: #6c757d;
-    color: white;
+    background-color: var(--surface-3);
+    color: var(--ink);
     border: none;
     padding: 5px 12px;
-    border-radius: 15px;
+    border-radius: var(--radius-lg);
     font-weight: 600;
     font-size: 12px;
     cursor: pointer;
@@ -1121,7 +1215,7 @@ button:disabled {
 }
 
 .cancel-edit-btn:hover {
-    background-color: #5a6268;
+    background-color: var(--surface-4);
 }
 
 .edit-comment-input {
@@ -1132,17 +1226,17 @@ button:disabled {
     padding: 2px 8px;
     font-size: 13px;
     line-height: 1.5;
-    border: 1px solid #dbdbdb;
-    border-radius: 6px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
     box-sizing: border-box;
 }
 
 .delete-comment-btn {
-    background-color: red;
-    color: white;
+    background-color: var(--danger);
+    color: var(--ink);
     border: none;
     padding: 5px 12px;
-    border-radius: 15px;
+    border-radius: var(--radius-lg);
     font-weight: 600;
     font-size: 12px;
     cursor: pointer;
@@ -1155,7 +1249,7 @@ button:disabled {
 }
 
 .delete-comment-btn:hover {
-    background-color: #cc0000;
+    background-color: var(--danger-strong);
 }
 
 .comment-like-btn {
@@ -1169,7 +1263,7 @@ button:disabled {
 }
 
 .comment-like-btn.liked {
-    color: red;
+    color: var(--danger);
 }
 
 .hamburger-menu {
@@ -1181,9 +1275,9 @@ button:disabled {
     position: absolute;
     right: 0;
     margin-top: 8px;
-    background-color: white;
-    border: 1px solid #efefef;
-    border-radius: 14px;
+    background-color: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     z-index: 999;
     min-width: 150px;
@@ -1204,7 +1298,7 @@ button:disabled {
 
 .dropdown-content > a:not(:last-child),
 .dropdown-content > button:not(:last-child) {
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--hairline);
 }
 
 .dropdown-content .btn {
@@ -1218,22 +1312,37 @@ button:disabled {
 }
 
 .dropdown-content .btn:hover {
-    background-color: #f7f7f7;
+    background-color: var(--surface-2);
 }
 
 .profile-container {
     max-width: 935px;
     margin: 0 auto;
     padding: 40px 20px;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* 회색 배경 위에서 떠 보이도록 카드로 감싼다. 카드 경계가 기존 구분선 역할을 대신한다 */
+/*
+ * 버튼 영역은 버튼이 없어도 같은 높이를 유지한다.
+ * 세로 중앙 정렬이라 이 높이가 달라지면 닉네임과 통계가 위아래로 움직인다.
+ * 상태 간 차이는 "버튼이 보이느냐"뿐이어야 한다.
+ */
+.profile-actions {
+    min-height: 43px;
+    display: flex;
+    align-items: center;
+}
+
+/* 여백은 래퍼가 책임지므로 버튼 자체의 위 여백은 없앤다 */
+.profile-actions .follow-btn {
+    margin-top: 0;
+}
+
 .profile-header {
     display: flex;
     align-items: center;
-    background: #fff;
-    border-radius: 12px;
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     padding: 28px 30px;
     margin-bottom: 24px;
@@ -1245,7 +1354,7 @@ button:disabled {
     border-radius: 50%;
     object-fit: cover;
     margin-right: 40px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--hairline-strong);
 }
 
 .profile-info h2 {
@@ -1264,19 +1373,19 @@ button:disabled {
     font-size: 14px;
     margin-top: 5px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
 }
 
 /* 관리자 정지 버튼: 되돌리기 어려운 동작이라 경고색을 유지한다 */
 #suspendUserBtn {
-    background-color: #ed4956;
-    color: #fff;
+    background-color: var(--danger);
+    color: var(--ink);
     font-weight: 600;
 }
 
 #suspendUserBtn:hover {
-    background-color: #c42f44;
+    background-color: var(--danger-strong);
 }
 
 .profile-posts {
@@ -1331,7 +1440,7 @@ button:disabled {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     transition: transform 0.3s ease;
 }
 
@@ -1358,9 +1467,9 @@ button:disabled {
 .img-modal-content {
     position: relative;
     z-index: 1;
-    background: #fff;
+    background: var(--surface-1);
     padding: 28px;
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1372,16 +1481,16 @@ button:disabled {
     height: 300px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #ddd;
+    border: 1px solid var(--hairline);
 }
 
 /* 정지 유저 목록 */
 /* 관리자 목록의 카드 한 줄. 정지 유저 목록과 신고 목록이 같이 쓴다. */
 .suspended-user-item,
 .admin-list-item {
-    background-color: white;
+    background-color: var(--surface-1);
     padding: 15px 20px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.08);
     display: flex;
     align-items: center;
@@ -1390,17 +1499,17 @@ button:disabled {
 }
 
 .suspended-user-item .suspend-until {
-    color: #888;
+    color: var(--ink-subtle);
     margin-left: 12px;
     font-size: 14px;
 }
 
 .unsuspend-btn {
-    background-color: #ed4956;
-    color: white;
+    background-color: var(--danger);
+    color: var(--ink);
     border: none;
     padding: 7px 18px;
-    border-radius: 9999px;
+    border-radius: var(--radius-pill);
     font-weight: 600;
     font-size: 14px;
     letter-spacing: 0.03em;
@@ -1411,7 +1520,7 @@ button:disabled {
 }
 
 .unsuspend-btn:hover {
-    background-color: #c42f44;
+    background-color: var(--danger-strong);
     box-shadow: 0 4px 10px rgba(196, 47, 68, 0.7);
 }
 
@@ -1432,10 +1541,10 @@ button:disabled {
     pointer-events: auto;
     cursor: default;
     padding: 11px 20px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-size: 14px;
     font-weight: 700;
-    color: #fff;
+    color: var(--ink);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
     opacity: 0;
     transform: translateY(16px);
@@ -1451,15 +1560,16 @@ button:disabled {
 }
 
 .toast-success {
-    background-color: #2f9e60;
+    background-color: var(--success);
 }
 
 .toast-error {
-    background-color: #ed4956;
+    background-color: var(--danger);
 }
 
 .toast-info {
-    background-color: #262626;
+    background-color: var(--surface-3);
+    border: 1px solid var(--hairline-strong);
 }
 
 .cm-backdrop {
@@ -1473,8 +1583,8 @@ button:disabled {
 }
 
 .cm-box {
-    background: #fff;
-    border-radius: 14px;
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
     width: 360px;
     max-width: 90vw;
     padding: 24px 22px 18px;
@@ -1485,7 +1595,7 @@ button:disabled {
     margin: 0 0 20px;
     font-size: 15px;
     line-height: 1.6;
-    color: #262626;
+    color: var(--ink);
     text-align: center;
     white-space: pre-line;
 }
@@ -1498,7 +1608,7 @@ button:disabled {
 .cm-btn {
     flex: 1;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     padding: 10px 0;
     font-weight: 600;
     font-size: 14px;
@@ -1506,29 +1616,29 @@ button:disabled {
 }
 
 .cm-cancel {
-    background: #efefef;
-    color: #262626;
+    background: var(--surface-2);
+    color: var(--ink);
 }
 
 .cm-cancel:hover {
-    background: #e0e0e0;
+    background: var(--surface-3);
 }
 
 .cm-ok {
-    background: #6366f1;
-    color: #fff;
+    background: var(--primary);
+    color: var(--ink);
 }
 
 .cm-ok:hover {
-    background: #4f46e5;
+    background: var(--primary-hover);
 }
 
 .cm-ok.cm-danger {
-    background: #ed4956;
+    background: var(--danger);
 }
 
 .cm-ok.cm-danger:hover {
-    background: #d43d4a;
+    background: var(--danger);
 }
 
 @keyframes flashSuccess {
@@ -1538,7 +1648,7 @@ button:disabled {
 
 .flash-success {
     animation: flashSuccess 0.9s ease-out;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
 }
 
 /*
@@ -1555,8 +1665,9 @@ button:disabled {
     z-index: 90;
     display: inline-flex;
     gap: 4px;
-    background: #111827;
-    border-radius: 30px;
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-pill);
     padding: 5px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
     max-width: none;
@@ -1577,44 +1688,69 @@ button:disabled {
     padding: 8px 20px;
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
-    background: #1a1d26;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 30px;
+    color: var(--ink);
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-pill);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     cursor: pointer;
 }
 
 .new-posts-btn:hover {
-    background: #252a36;
+    background: var(--surface-3);
 }
 
 .feed-tab {
     padding: 8px 22px;
     font-size: 14px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--ink-subtle);
     text-decoration: none;
-    border-radius: 24px;
+    border-radius: var(--radius-pill);
     border-bottom: none;
     margin-bottom: 0;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .feed-tab:hover {
-    color: #fff;
+    color: var(--ink);
 }
 
 .feed-tab.active {
-    background: rgba(255, 255, 255, 0.16);
-    color: #fff;
+    background: var(--surface-3);
+    color: var(--ink);
     border-bottom-color: transparent;
 }
 
 
+/* 비어 있음, 정지됨 같은 안내 문구. 화면마다 회색을 따로 적지 않고 이 클래스를 단다 */
+.text-subtle {
+    color: var(--ink-subtle);
+}
+
+/* 관리자의 이용정지 메뉴. 열고 닫기는 JS가 display로 한다 */
+#profileSuspendMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    z-index: 10;
+    white-space: nowrap;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    padding: 10px;
+}
+
+#nicknameInput {
+    width: 220px;
+    margin: 0;
+    font-size: 16px;
+}
+
 .feed-empty {
     text-align: center;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 14px;
     line-height: 1.7;
     padding: 60px 20px;
@@ -1622,7 +1758,7 @@ button:disabled {
 
 .feed-loading {
     text-align: center;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 13px;
     padding: 16px 0 32px;
 }
@@ -1637,7 +1773,7 @@ button:disabled {
     gap: 26px;
     margin-top: 12px;
     font-size: 14px;
-    color: #262626;
+    color: var(--ink);
 }
 
 .profile-stats b {
@@ -1648,10 +1784,10 @@ button:disabled {
     margin-top: 14px;
     padding: 7px 22px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     /* 주요 동작이므로 검정 채움. 보조인 메시지 버튼은 테두리만 둬서 위계를 만든다 */
-    background-color: #262626;
-    color: #fff;
+    background-color: var(--ink);
+    color: var(--inverse-ink);
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
@@ -1659,18 +1795,18 @@ button:disabled {
 }
 
 .follow-btn:hover {
-    background-color: #000;
+    background-color: var(--ink-muted);
 }
 
 /* 이미 팔로우 중이면 강조할 이유가 없으므로 채움을 빼고 테두리만 남긴다 */
 .follow-btn.following {
     background-color: transparent;
-    color: #262626;
-    border: 1px solid #d4d4d4;
+    color: var(--ink);
+    border: 1px solid var(--hairline-strong);
 }
 
 .follow-btn.following:hover {
-    background-color: #f5f5f5;
+    background-color: var(--surface-2);
 }
 
 .follow-btn:disabled {
@@ -1684,7 +1820,7 @@ button:disabled {
 }
 
 .profile-stats .stat-link:hover {
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 .fl-backdrop {
@@ -1698,8 +1834,8 @@ button:disabled {
 }
 
 .fl-box {
-    background: #fff;
-    border-radius: 14px;
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
     width: 400px;
     max-width: 90vw;
     max-height: 70vh;
@@ -1715,8 +1851,8 @@ button:disabled {
     text-align: center;
     font-weight: 600;
     font-size: 15px;
-    color: #262626;
-    border-bottom: 1px solid #efefef;
+    color: var(--ink);
+    border-bottom: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
@@ -1728,7 +1864,7 @@ button:disabled {
     background: none;
     border: none;
     padding: 4px;
-    color: #262626;
+    color: var(--ink);
     cursor: pointer;
     display: inline-flex;
 }
@@ -1748,7 +1884,7 @@ button:disabled {
 }
 
 .fl-row:hover {
-    background: #fafafa;
+    background: var(--surface-2);
 }
 
 .fl-avatar {
@@ -1756,20 +1892,20 @@ button:disabled {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #efefef;
+    border: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
 .fl-username {
     font-weight: 600;
     font-size: 14px;
-    color: #262626;
+    color: var(--ink);
 }
 
 .fl-empty {
     padding: 40px 20px;
     text-align: center;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 14px;
 }
 .noti-menu {
@@ -1784,7 +1920,7 @@ button:disabled {
     border: none;
     padding: 4px;
     cursor: pointer;
-    color: #262626;
+    color: var(--ink);
     display: inline-flex;
     align-items: center;
 }
@@ -1800,9 +1936,9 @@ button:disabled {
     min-width: 17px;
     height: 17px;
     padding: 0 4px;
-    border-radius: 9px;
-    background: #ed4956;
-    color: #fff;
+    border-radius: var(--radius-md);
+    background: var(--danger);
+    color: var(--ink);
     font-size: 11px;
     font-weight: 700;
     display: flex;
@@ -1820,9 +1956,9 @@ button:disabled {
     max-height: 420px;
     display: flex;
     flex-direction: column;
-    background: #fff;
-    border: 1px solid #efefef;
-    border-radius: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
     overflow: hidden;
     z-index: 200;
@@ -1832,8 +1968,8 @@ button:disabled {
     padding: 13px 16px;
     font-weight: 600;
     font-size: 15px;
-    color: #262626;
-    border-bottom: 1px solid #efefef;
+    color: var(--ink);
+    border-bottom: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
@@ -1853,14 +1989,14 @@ button:disabled {
 
 /* 알림 사이 구분선 (마지막 항목 아래에는 없음) */
 .noti-row:not(:last-child) {
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--hairline);
 }
 
 /* 댓글 알림의 내용 미리보기 */
 .noti-preview {
     margin-top: 3px;
     font-size: 13px;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -1870,15 +2006,15 @@ button:disabled {
 }
 
 .noti-row:hover {
-    background: #fafafa;
+    background: var(--surface-2);
 }
 
 .noti-row.unread {
-    background: #f0f8ff;
+    background: var(--primary-tint);
 }
 
 .noti-row.unread:hover {
-    background: #e6f2fd;
+    background: var(--primary-tint);
 }
 
 .noti-avatar {
@@ -1886,7 +2022,7 @@ button:disabled {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #efefef;
+    border: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
@@ -1898,7 +2034,7 @@ button:disabled {
 .noti-text {
     font-size: 14px;
     line-height: 1.45;
-    color: #262626;
+    color: var(--ink);
     word-break: break-word;
 }
 
@@ -1909,22 +2045,22 @@ button:disabled {
 .noti-time {
     margin-top: 2px;
     font-size: 12px;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 .noti-thumb {
     width: 40px;
     height: 40px;
     object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid #efefef;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
 .noti-empty {
     padding: 40px 20px;
     text-align: center;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 14px;
 }
 
@@ -1956,17 +2092,17 @@ button:disabled {
     height: 36px;
     padding: 0 14px;
     font-size: 14px;
-    border: 1px solid #efefef;
-    border-radius: 9999px;
-    background: #fafafa;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
     outline: none;
     box-sizing: border-box;
     margin: 0;
 }
 
 .search-box .search-input:focus {
-    background: #fff;
-    border-color: #dbdbdb;
+    background: var(--surface-1);
+    border-color: var(--hairline);
 }
 
 .search-dropdown {
@@ -1978,9 +2114,9 @@ button:disabled {
     max-height: 420px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    background: #fff;
-    border: 1px solid #efefef;
-    border-radius: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
     z-index: 200;
     padding: 6px 0;
@@ -1990,7 +2126,7 @@ button:disabled {
     padding: 8px 16px 4px;
     font-size: 12px;
     font-weight: 600;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 .search-row {
@@ -2002,7 +2138,7 @@ button:disabled {
 }
 
 .search-row:hover {
-    background: #fafafa;
+    background: var(--surface-2);
 }
 
 .search-avatar {
@@ -2010,7 +2146,7 @@ button:disabled {
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #efefef;
+    border: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
@@ -2018,8 +2154,8 @@ button:disabled {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #efefef;
-    color: #262626;
+    background: var(--surface-2);
+    color: var(--ink);
     font-size: 18px;
     font-weight: 600;
     display: flex;
@@ -2031,23 +2167,23 @@ button:disabled {
 .search-name {
     font-size: 14px;
     font-weight: 600;
-    color: #262626;
+    color: var(--ink);
 }
 
 .search-sub {
     font-size: 12px;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 .search-empty {
     padding: 24px 16px;
     text-align: center;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 14px;
 }
 
 .hashtag-link {
-    color: #00376b;
+    color: var(--link);
     text-decoration: none;
 }
 
@@ -2066,7 +2202,7 @@ button:disabled {
     margin: 0 auto 20px;
     padding-top: 6px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #dcdee2;
+    border-bottom: 1px solid var(--hairline);
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -2076,13 +2212,13 @@ button:disabled {
 .tag-feed-name {
     font-size: 20px;
     font-weight: 600;
-    color: #262626;
+    color: var(--ink);
 }
 
 .tag-feed-back {
     font-size: 13px;
     font-weight: 600;
-    color: #6366f1;
+    color: var(--link);
     text-decoration: none;
 }
 
@@ -2177,8 +2313,8 @@ button:disabled {
     --chat-gap-bottom: 40px;
     max-width: 640px;
     margin: var(--chat-gap-top) auto var(--chat-gap-bottom);
-    background: #fff;
-    border-radius: 16px;
+    background: var(--surface-1);
+    border-radius: var(--radius-xl);
     box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
     overflow: hidden;
 }
@@ -2187,7 +2323,7 @@ button:disabled {
     margin: 0;
     padding: 18px 22px;
     font-size: 19px;
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--hairline);
 }
 
 /* --- 목록 --- */
@@ -2198,7 +2334,7 @@ button:disabled {
 .chat-empty {
     padding: 48px 20px;
     text-align: center;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 14px;
     line-height: 1.6;
 }
@@ -2210,11 +2346,11 @@ button:disabled {
     padding: 12px 22px;
     text-decoration: none;
     color: inherit;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid var(--hairline);
 }
 
 .chat-room-item:hover {
-    background: #fafafa;
+    background: var(--surface-2);
 }
 
 .chat-avatar {
@@ -2223,7 +2359,7 @@ button:disabled {
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
-    background: #f0f0f0;
+    background: var(--surface-2);
 }
 
 .chat-room-info {
@@ -2243,7 +2379,7 @@ button:disabled {
 }
 
 .chat-room-time {
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 12px;
 }
 
@@ -2256,7 +2392,7 @@ button:disabled {
 }
 
 .chat-room-preview {
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 13px;
     white-space: nowrap;
     overflow: hidden;
@@ -2264,7 +2400,7 @@ button:disabled {
 }
 
 .chat-room-preview.unread {
-    color: #262626;
+    color: var(--ink);
     font-weight: 600;
 }
 
@@ -2272,9 +2408,9 @@ button:disabled {
     min-width: 18px;
     height: 18px;
     padding: 0 5px;
-    border-radius: 9px;
-    background: #ed4956;
-    color: #fff;
+    border-radius: var(--radius-md);
+    background: var(--danger);
+    color: var(--ink);
     font-size: 11px;
     font-weight: 700;
     display: inline-flex;
@@ -2305,14 +2441,14 @@ body:has(.chat-room-container) {
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
 .chat-back {
     display: inline-flex;
     align-items: center;
-    color: #262626;
+    color: var(--ink);
     text-decoration: none;
     padding: 4px;
 }
@@ -2352,16 +2488,16 @@ body:has(.chat-room-container) {
     align-self: center;
     margin-bottom: 8px;
     padding: 6px 14px;
-    border: 1px solid #dbdbdb;
-    border-radius: 14px;
-    background: #fff;
-    color: #262626;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+    color: var(--ink);
     font-size: 12px;
     cursor: pointer;
 }
 
 .chat-load-prev:hover {
-    background: #fafafa;
+    background: var(--surface-2);
 }
 
 .chat-msg {
@@ -2382,7 +2518,7 @@ body:has(.chat-room-container) {
 
 .chat-bubble {
     padding: 8px 12px;
-    border-radius: 18px;
+    border-radius: var(--radius-xl);
     font-size: 14px;
     line-height: 1.45;
     word-break: break-word;
@@ -2390,20 +2526,20 @@ body:has(.chat-room-container) {
 }
 
 .chat-msg.mine .chat-bubble {
-    /* 상대 말풍선(#efefef)과 명확히 대비되도록 검정에 가까운 색을 쓴다 */
-    background: #111827;
-    color: #fff;
+    /* 내 말은 밝은 반전 색, 상대 말은 어두운 판. 어느 쪽이 내 말인지 색만으로 바로 갈린다 */
+    background: var(--ink);
+    color: var(--inverse-ink);
     border-bottom-right-radius: 4px;
 }
 
 .chat-msg.theirs .chat-bubble {
-    background: #efefef;
-    color: #262626;
+    background: var(--surface-2);
+    color: var(--ink);
     border-bottom-left-radius: 4px;
 }
 
 .chat-msg-time {
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 11px;
     flex-shrink: 0;
 }
@@ -2413,7 +2549,7 @@ body:has(.chat-room-container) {
     align-items: center;   /* 입력칸과 보내기 버튼의 세로 중심을 맞춘다 */
     gap: 8px;
     padding: 12px 16px;
-    border-top: 1px solid #efefef;
+    border-top: 1px solid var(--hairline);
     flex-shrink: 0;
 }
 
@@ -2426,9 +2562,9 @@ body:has(.chat-room-container) {
 .chat-send-form .chat-input {
     flex: 1;
     /* 테두리만 있으면 입력 필드로 읽히지 않아 옅은 배경을 깔고 알약 형태로 만든다 */
-    background: #f4f5f8;
-    border: 1px solid #e4e6eb;
-    border-radius: 22px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-xl);
     padding: 11px 18px;
     font-size: 14px;
     line-height: 1.4;
@@ -2438,28 +2574,28 @@ body:has(.chat-room-container) {
 }
 
 .chat-send-form .chat-input:focus {
-    background: #fff;
-    border-color: #111827;
+    background: var(--surface-1);
+    border-color: var(--primary-focus);
 }
 
 .chat-send-btn {
     border: none;
     background: none;
-    color: #111827;
+    color: var(--ink);
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
     padding: 8px 10px;
-    border-radius: 18px;
+    border-radius: var(--radius-xl);
 }
 
 .chat-send-btn:not(:disabled):hover {
-    background: #f0f1f3;
+    background: var(--surface-2);
 }
 
 /* 활성이 검정이므로 비활성도 인디고가 아닌 회색이어야 톤이 맞는다 */
 .chat-send-btn:disabled {
-    color: #b0b3b8;
+    color: var(--ink-subtle);
     cursor: default;
 }
 
@@ -2475,12 +2611,12 @@ body:has(.chat-room-container) {
 .profile-info button.message-btn {
     margin-left: 8px;
     background-color: transparent;
-    color: #262626;
-    border: 1px solid #d4d4d4;
+    color: var(--ink);
+    border: 1px solid var(--hairline-strong);
 }
 
 .profile-info button.message-btn:hover {
-    background-color: #f5f5f5;
+    background-color: var(--surface-2);
 }
 
 /* 읽음 표시: 검은 원 안의 흰 체크. 상대가 읽기 전에는 숨긴다 */
@@ -2488,7 +2624,8 @@ body:has(.chat-room-container) {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #262626;
+    background: var(--ink);
+    color: var(--inverse-ink);
     display: none;
     align-items: center;
     justify-content: center;
@@ -2503,9 +2640,9 @@ body:has(.chat-room-container) {
 .chat-msg-menu {
     position: absolute;
     z-index: 20;
-    background: #fff;
-    border: 1px solid #dbdbdb;
-    border-radius: 10px;
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
     overflow: hidden;
     min-width: 96px;
@@ -2523,21 +2660,21 @@ body:has(.chat-room-container) {
 }
 
 .chat-msg-menu-item:hover {
-    background: #fafafa;
+    background: var(--surface-2);
 }
 
 .chat-msg-menu-item.edit {
-    color: #6366f1;
+    color: var(--link);
 }
 
 .chat-msg-menu-item.delete {
-    color: #ed4956;
-    border-top: 1px solid #efefef;
+    color: var(--danger);
+    border-top: 1px solid var(--hairline);
 }
 
 /*
  * 삭제된 메시지: 말풍선 배경은 그대로 두고 글씨만 흐린 기울임으로 구분한다.
- * 내 말풍선은 검은 바탕, 상대 말풍선은 밝은 바탕이라
+ * 내 말풍선은 밝은 바탕, 상대 말풍선은 어두운 바탕이라
  * 같은 회색을 쓰면 한쪽이 반드시 안 읽힌다. 그래서 방향별로 나눈다.
  */
 .chat-bubble.deleted {
@@ -2545,298 +2682,12 @@ body:has(.chat-room-container) {
 }
 
 .chat-msg.mine .chat-bubble.deleted {
-    color: #9ca3af !important;
+    color: var(--ink-tertiary) !important;
 }
 
 .chat-msg.theirs .chat-bubble.deleted {
-    color: #5f6672 !important;
+    color: var(--ink-subtle) !important;
 }
-
-/* 헤더 다크 (시험)
- * 헤더 바만 검게 하고 내부 요소를 흰색 계열로 뒤집는다.
- * 되돌리기 쉽도록 원래 규칙은 두고 여기서 덮어쓴다.
- */
-.header-bar {
-    background-color: #111827;
-}
-
-.header-bar .logo-link,
-.header-bar .username,
-.header-bar .noti-btn,
-.header-bar #hamburgerBtn {
-    color: #fff;
-}
-
-/* 햄버거는 자체 스타일이 없어 버튼 기본값을 따라가므로 여기서 정리한다 */
-.header-bar #hamburgerBtn {
-    background: none;
-    border: none;
-    padding: 4px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-}
-
-/* 로그아웃은 보조 동작이라 흰색보다 한 단계 낮춘다 */
-.header-bar .logout-btn {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.header-bar .logout-btn:hover {
-    color: #fff;
-}
-
-.header-bar .login-btn {
-    color: #fff;
-}
-
-.header-bar .login-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* 검색창: 흰 덩어리로 튀지 않도록 바 위에 얹힌 반투명 필드로 */
-.header-bar .search-box .search-input {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.18);
-    color: #fff;
-}
-
-.header-bar .search-box .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.55);
-}
-
-.header-bar .search-box .search-input:focus {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.35);
-}
-
-/* 다크 배경 (우주 컨셉)
- * 명도 3단계로 층을 만든다: 배경(가장 어두움) < 헤더/탭(한 단계 밝게) < 카드(흰색).
- * 검은 배경에서는 그림자가 보이지 않으므로, 경계는 명도 차이와 미세한 흰 테두리로 만든다.
- * 흰 피드 카드는 "어두운 우주에 떠 있는 별"로 의도한 대비다.
- */
-:root {
-    --page-bg: 10 12 16;
-}
-
-/* 헤더: 배경보다 한 단계 밝게 + 테두리로 경계를 만든다 (그림자는 검은 배경에서 무용) */
-.header-bar {
-    background-color: #1a1d26;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: none;
-}
-
-/* 하단 탭도 같은 층위 */
-.feed-tabs {
-    background: #1a1d26;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-/*
- * 배경 위에 직접 놓인 제목만 밝게 뒤집는다.
- * h2는 어두운 배경(로그인/회원가입/새 게시물/관리자 목록)과
- * 흰 카드 안(채팅 제목, 프로필 닉네임) 양쪽에 쓰이므로
- * 전역으로 바꾸면 카드 안 제목이 흰 배경에 묻힌다.
- * 관리자 님의 콘텐츠의 소제목(h3)도 배경 위에 놓여서 같이 뒤집는다.
- */
-body > h2,
-.post-create-title,
-.feed-container > h2,
-.feed-container > h3 {
-    color: #e5e7eb;
-}
-
-.feed-empty {
-    color: #9aa2ad;
-}
-
-.tag-feed-header {
-    border-bottom-color: rgba(255, 255, 255, 0.12);
-}
-
-.tag-feed-name {
-    color: #e5e7eb;
-}
-
-.tag-feed-back {
-    color: #9aa2ad;
-}
-
-.tag-feed-back:hover {
-    color: #fff;
-}
-
-/*
- * 업로드 버튼은 login-btn 클래스를 재사용하는데,
- * 로그인/로그아웃을 텍스트만 남기면서 배경을 잃어 어두운 배경에 묻혔다.
- * 글 작성의 주요 동작이므로 흰 알약으로 되살린다.
- */
-.post-upload-btn {
-    background: #fff;
-    color: #111827;
-    padding: 10px 32px;
-    border-radius: 24px;
-    font-weight: 700;
-}
-
-.post-upload-btn:hover {
-    background: #e5e7eb;
-    color: #111827;
-}
-
-/*
- * 프로필 상단도 헤더·탭과 같은 층으로 어둡게 둔다.
- * 흰색은 게시물(별)에만 쓰고, 껍데기는 어둡게 — 이 규칙이 서면 별이 더 도드라진다.
- */
-.profile-header {
-    background: #1a1d26;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: none;
-}
-
-.profile-header #nicknameText {
-    color: #fff;
-}
-
-.profile-header .profile-stats {
-    color: #cbd0d8;
-}
-
-.profile-header .profile-img {
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* 어두운 카드에서는 검은 채움 버튼이 사라지므로 명암을 뒤집는다 */
-.profile-header .follow-btn {
-    background-color: #fff;
-    color: #111827;
-}
-
-.profile-header .follow-btn:hover {
-    background-color: #e5e7eb;
-}
-
-.profile-header .follow-btn.following {
-    background-color: transparent;
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.35);
-}
-
-.profile-header .follow-btn.following:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.profile-header button.message-btn {
-    background-color: transparent;
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.35);
-}
-
-.profile-header button.message-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/*
- * 버튼 영역은 버튼이 없어도 같은 높이를 유지한다.
- * 세로 중앙 정렬이라 이 높이가 달라지면 닉네임과 통계가 위아래로 움직인다.
- * 상태 간 차이는 "버튼이 보이느냐"뿐이어야 한다.
- */
-.profile-actions {
-    min-height: 43px;
-    display: flex;
-    align-items: center;
-}
-
-/* 여백은 래퍼가 책임지므로 버튼 자체의 위 여백은 없앤다 */
-.profile-actions .follow-btn {
-    margin-top: 0;
-}
-
-/* 드롭다운 다크 (헤더에서 나오는 껍데기)
- * 헤더 위에 떠 있으므로 헤더(#1a1d26)보다 한 단계 밝게 둔다(elevation 규칙).
- * 안읽음 표시는 연한 파랑을 쓰던 자리라 무채색에서는 명도로만 구분한다.
- */
-.dropdown-content,
-.noti-dropdown,
-.search-dropdown {
-    background-color: #212530;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
-}
-
-/* --- 햄버거 메뉴 --- */
-.dropdown-content > a:not(:last-child),
-.dropdown-content > button:not(:last-child) {
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-
-.dropdown-content .btn {
-    color: #e5e7eb;
-}
-
-.dropdown-content .btn:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-/* 회원탈퇴는 되돌릴 수 없는 동작이라 경고색을 유지하되 어두운 배경에 맞게 밝힌다 */
-.dropdown-content .delete-btn {
-    color: #ff6b78;
-}
-
-/* --- 알림 --- */
-.noti-header {
-    color: #fff;
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-}
-
-.noti-row:not(:last-child) {
-    border-bottom-color: rgba(255, 255, 255, 0.07);
-}
-
-.noti-row:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-/* 안읽음: 색 대신 밝기로 구분한다 */
-.noti-row.unread {
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.noti-row.unread:hover {
-    background: rgba(255, 255, 255, 0.09);
-}
-
-.noti-text {
-    color: #e5e7eb;
-}
-
-.noti-preview,
-.noti-time,
-.noti-empty {
-    color: #9aa2ad;
-}
-
-/* --- 검색 --- */
-.search-row:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.search-section,
-.search-sub,
-.search-empty {
-    color: #9aa2ad;
-}
-
-.search-name {
-    color: #e5e7eb;
-}
-
-.search-tag-icon {
-    background: rgba(255, 255, 255, 0.12);
-    color: #e5e7eb;
-}
-
 
 /*
  * 답글은 한 단만 들어간다. 답글의 답글도 같은 자리에 붙기 때문에
@@ -2863,7 +2714,7 @@ body > h2,
     box-shadow: none;
     font-size: 12px;
     font-weight: 600;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     cursor: pointer;
 }
 
@@ -2874,16 +2725,16 @@ body > h2,
     height: 1px;
     margin-right: 8px;
     vertical-align: middle;
-    background-color: #c7c7c7;
+    background-color: var(--hairline-strong);
 }
 
 .reply-toggle-btn:hover {
-    color: #262626;
+    color: var(--ink);
 }
 
 /* 멘션 링크. 해시태그와 같은 무게로 두어 한 문장 안에서 튀지 않게 한다 */
 .mention-link {
-    color: #00376b;
+    color: var(--link);
     font-weight: 600;
     text-decoration: none;
 }
@@ -2898,17 +2749,17 @@ body > h2,
     border: none;
     padding: 2px 6px;
     box-shadow: none;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 12px;
     cursor: pointer;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .pd-meta .reply-comment-btn:hover {
-    background-color: #8e8e8e;
-    color: #fff;
+    background-color: var(--surface-3);
+    color: var(--ink);
 }
 
 /*
@@ -2923,7 +2774,7 @@ body > h2,
     gap: 8px;
     padding: 0 4px;
     font-size: 12px;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
 }
 
 .reply-target button {
@@ -2933,41 +2784,25 @@ body > h2,
     box-shadow: none;
     font-size: 12px;
     font-weight: 600;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     cursor: pointer;
 }
 
 .reply-target button:hover {
-    color: #262626;
+    color: var(--ink);
 }
 
 /* 신고
- * 프로필의 ...메뉴는 게시글 상세의 .pd-menu 를 그대로 쓰고,
- * 어두운 프로필 카드 위에 놓이기 때문에 색만 뒤집는다.
+ * 프로필의 ...메뉴는 게시글 상세의 .pd-menu 를 그대로 쓴다.
  */
 .profile-actions .pd-menu {
     margin-left: 4px;
-}
-
-.profile-actions .pd-menu-btn {
-    color: #e5e7eb;
 }
 
 /* 버튼이 카드 왼쪽에 있으므로 오른쪽이 아니라 왼쪽 기준으로 펼친다 */
 .profile-actions .pd-menu-dropdown {
     left: 0;
     right: auto;
-    background: #212530;
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
-}
-
-.profile-actions .pd-menu-dropdown .btn {
-    color: #e5e7eb;
-}
-
-.profile-actions .pd-menu-dropdown .btn:hover {
-    background: rgba(255, 255, 255, 0.08);
 }
 
 /* --- 신고 모달 (댓글 수정 모달의 .ce-* 를 확장) --- */
@@ -2975,7 +2810,7 @@ body > h2,
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     margin-bottom: 6px;
 }
 
@@ -2989,16 +2824,16 @@ body > h2,
     box-sizing: border-box;
     padding: 10px 12px;
     font-size: 14px;
-    border: 1px solid #dbdbdb;
-    border-radius: 8px;
-    background: #fff;
-    color: #262626;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--surface-1);
+    color: var(--ink);
     cursor: pointer;
 }
 
 .ce-select:focus {
     outline: none;
-    border-color: #6366f1;
+    border-color: var(--primary);
 }
 
 /* --- 관리자 신고 목록 --- */
@@ -3024,11 +2859,11 @@ body > h2,
 
 .report-username {
     font-weight: 700;
-    color: #262626;
+    color: var(--ink);
 }
 
 .report-sub {
-    color: #8e8e8e;
+    color: var(--ink-subtle);
     font-size: 13px;
 }
 
@@ -3043,9 +2878,9 @@ body > h2,
 .report-count {
     min-width: 30px;
     padding: 4px 10px;
-    border-radius: 9999px;
-    background: #111827;
-    color: #fff;
+    border-radius: var(--radius-pill);
+    background: var(--ink);
+    color: var(--inverse-ink);
     font-weight: 700;
     font-size: 15px;
     text-align: center;
@@ -3053,9 +2888,9 @@ body > h2,
 
 .report-tag {
     padding: 3px 9px;
-    border-radius: 9999px;
-    background: #ffe3e6;
-    color: #c0303c;
+    border-radius: var(--radius-pill);
+    background: var(--danger-tint);
+    color: var(--danger);
     font-size: 12px;
     font-weight: 700;
     vertical-align: middle;
@@ -3088,7 +2923,7 @@ body > h2,
 }
 
 .report-link {
-    color: #262626;
+    color: var(--ink);
     font-weight: 600;
     text-decoration: none;
 }
@@ -3117,35 +2952,35 @@ body > h2,
 
 .report-reason {
     font-size: 14px;
-    color: #262626;
+    color: var(--ink);
 }
 
 .report-status {
     padding: 2px 8px;
-    border-radius: 9999px;
+    border-radius: var(--radius-pill);
     font-size: 12px;
     font-weight: 700;
 }
 
 .report-status.pending {
-    background: #eef0fe;
-    color: #4f46e5;
+    background: var(--primary-tint);
+    color: var(--link);
 }
 
 .report-status.resolved {
-    background: #e7f3e9;
-    color: #2f7a3d;
+    background: var(--success-tint);
+    color: var(--success);
 }
 
 .report-status.rejected {
-    background: #f0f1f3;
-    color: #6b7280;
+    background: var(--surface-2);
+    color: var(--ink-muted);
 }
 
 .report-detail-text {
     font-size: 14px;
     line-height: 1.5;
-    color: #262626;
+    color: var(--ink);
     white-space: pre-wrap;
     word-break: break-word;
 }
@@ -3153,19 +2988,19 @@ body > h2,
 /* 관리자 님의 콘텐츠에서 댓글이 달린 원문 글. 댓글 본문과 구분되게 회색 바탕에 둔다 */
 .admin-quote {
     padding: 8px 10px;
-    background: #f5f5f5;
-    border-radius: 6px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
     font-size: 13px;
-    color: #555;
+    color: var(--ink-muted);
     word-break: break-word;
 }
 
 .report-reject-btn {
     background: none;
-    border: 1px solid #dbdbdb;
-    color: #262626;
+    border: 1px solid var(--hairline);
+    color: var(--ink);
     padding: 6px 14px;
-    border-radius: 9999px;
+    border-radius: var(--radius-pill);
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
@@ -3173,7 +3008,7 @@ body > h2,
 }
 
 .report-reject-btn:hover {
-    background: #f0f1f3;
+    background: var(--surface-2);
 }
 
 /* 관리자 목록 탭.
@@ -3185,21 +3020,21 @@ body > h2,
     display: inline-flex;
     gap: 4px;
     padding: 5px;
-    border-radius: 30px;
-    background: #1a1d26;
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: var(--radius-pill);
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
 }
 
 /* 처리가 끝난 건은 조치할 것이 없으므로 숫자를 눌러둔다 */
 .report-count.handled {
     background: rgba(255, 255, 255, 0.12);
-    color: #cbd0d8;
+    color: var(--ink-muted);
 }
 
 /* 반려할 대기 신고가 없을 때. 자리는 그대로 두고 누를 수 없다는 것만 보여준다. */
 .report-reject-btn:disabled {
-    color: #b0b3b8;
-    border-color: #ededed;
+    color: var(--ink-subtle);
+    border-color: var(--hairline);
     cursor: default;
 }
 
@@ -3267,7 +3102,7 @@ body > h2,
     width: var(--s);
     height: var(--s);
     border-radius: 50%;
-    background: #fff;
+    background: var(--starlight);
     opacity: var(--o);
     will-change: transform;
     animation: star-drift var(--dt) ease-in-out var(--dd) infinite alternate;
@@ -3404,7 +3239,7 @@ body > h2,
     width: 3px;
     height: 3px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--starlight);
     box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.8);
 }
 

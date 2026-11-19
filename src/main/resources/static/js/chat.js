@@ -226,7 +226,7 @@
     // 삭제된 메시지는 읽음 체크를 보여줄 이유가 없다
     const readMark = (mine && !m.deleted)
       ? `<span class="chat-read-check${m.read ? ' on' : ''}" aria-label="읽음">
-           <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+           <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
          </span>`
       : '';
     const bubble = m.deleted
