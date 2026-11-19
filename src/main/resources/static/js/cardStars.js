@@ -1,11 +1,11 @@
-// 메인 피드 카드가 헤더 밑으로 절반쯤 들어가면 위로 날아가 화면 밖으로 나가고,
-// 잠시 뒤 유성이 되어 위에서 다시 내려와 배경 별로 앉는다. 위로 되돌려 그 카드 자리가 다시 보이면
-// 별이 유성이 되어 위로 빠져나가고 카드가 위에서 떨어져 제자리로 돌아온다.
+// 메인 피드 카드가 헤더 밑으로 절반쯤 들어가면 보이던 자리에서 작아져 별이 되고, 그 별이 유성이 되어
+// 포물선을 그리며 위로 헤더 뒤까지 솟았다가 왼쪽이나 오른쪽으로 내려와 배경 별로 앉는다.
+// 위로 되돌려 그 카드 자리가 다시 보이면 별이 같은 포물선을 거꾸로 날아와, 닿은 점에서 카드가 다시 커져 제자리로 돌아온다.
 //
-// 스크롤에 묶지 않고 시간으로 재생한다(Web Animations API). "던진다"는 느낌은 스크롤 속도와 상관없이
-// 늘 같은 빠르기와 곡선에서 나온다. 위로 날리는 길은 스크롤과 방향이 같아서 계속 굴려도 비틀리지 않는다.
+// 스크롤에 묶지 않고 시간으로 재생한다(Web Animations API). 작아지는 빠르기와 곡선은 스크롤 속도와 상관없이 늘 같다.
 // 움직이는 것은 transform과 opacity뿐이고 카드 자리(레이아웃)는 그대로다.
 // 언제 날리고 돌려놓을지는 IntersectionObserver가 넘겨주는 위치로 정해서 스크롤 중에 레이아웃을 읽지 않는다.
+// 레이아웃은 카드가 별이 되는 순간 유성이 나갈 점을 정하려고 한 번만 읽는다.
 //
 // 움직이는 것은 안쪽 .post-card이고, 관찰하는 것은 제자리에 있는 바깥 .post-summary다.
 // IntersectionObserver는 transform까지 반영한 위치를 넘겨주므로, 움직이는 카드를 관찰하면 날아가는 동안의 값은
@@ -20,26 +20,35 @@
 
   // 보일 수 있는 높이 중 이만큼 아래로만 남으면 날린다(캡션은 이미 지나간 뒤다).
   // 돌아올 때는 조금 더 보여야 돌아오게 해서, 경계에서 스크롤이 떨려도 날아갔다 돌아왔다 하지 않는다.
-  const THROW_BELOW = 0.45;
+  const THROW_BELOW = 0.5;
   const RETURN_FROM = 0.6;
 
-  // 살짝 가라앉았다가(준비 동작) 가속해 빠져나간다. 끝의 감속은 헤더 밑, 화면 밖이라 보이지 않는다
-  const THROW_MS = 520;
-  const THROW_EASE = 'cubic-bezier(0.5, -0.12, 0.35, 1)';
-  // 카드 아랫변이 화면 위로 다 나가고도 이만큼 더 올라간다
-  const LIFT_EXTRA = 120;
+  // 헤더 밑에 보이는 부분의 한가운데에서 카드 크기부터 별 크기(폭 STAR_PX)까지 한 번에 작아지고,
+  // 그 점에서 유성이 나간다. 예전처럼 4분의 1에서 멈칫했다가 사라지면 어느 크기에서 갑자기 별로 바뀌는 것처럼 보였다(유저 확인).
+  // 크기는 같은 시간마다 같은 비율로 준다(600px → 6px이면 100분의 1을 고르게 나눠 곱한다). 크기를 고르게 빼면
+  // 처음에는 빠르고 작아질수록 거의 멈춘 것처럼 보이는데, 비율로 줄이면 처음부터 끝까지 같은 빠르기로 작아져 보인다.
+  // 투명도는 끝까지 1이라 사라지지 않고 별 크기가 된 순간 유성 머리(3px)가 그 자리를 이어받는다.
+  // 예전처럼 위로 날려 보내면 남은 아래쪽이 0.1~0.17초 만에 헤더 뒤로 숨어 작아지는 모습이 거의 보이지 않았다
+  const STAR_PX = 6;
+  const THROW_MS = 560;
+  const THROW_EASE = 'cubic-bezier(0.45, 0, 0.55, 1)';
+  // 비율로 줄이는 곡선을 이만큼 잘라 키프레임으로 찍는다(약 0.04초 간격)
+  const SHRINK_STEPS = 14;
 
-  // 카드가 나간 뒤 잠깐 쉬었다가 유성이 들어온다. 빠르게 들어와 천천히 자리 잡는다
-  const METEOR_DELAY_MS = 140;
-  const METEOR_MS = 900;
-  const METEOR_EASE = 'cubic-bezier(0.15, 0.6, 0.25, 1)';
+  // 별이 된 점에서 바로 유성이 나가 포물선 하나로 날아가 앉는다. 위로 솟는 유성과 내려오는 유성을 따로 날리면
+  // 둘이 따로 노는 것처럼 보여서(유저 확인) 한 번에 그린다. 꼭대기는 헤더 아랫선보다 이만큼 위, 헤더 뒤라서
+  // 잠깐 헤더 너머로 넘어갔다 내려오는 것처럼 보인다. 앞부분은 빠르고 끝은 천천히 내려앉는다
+  const ARC_OVER = 30;
+  const ARC_MS = 1000;
+  const ARC_EASE = 'cubic-bezier(0.25, 0.1, 0.35, 1)';
+  // 포물선을 이만큼 잘라 키프레임으로 찍는다. 꼬리 방향도 점마다 맞춘다(약 0.04초 간격)
+  const ARC_STEPS = 24;
 
-  // 되돌릴 때 별이 먼저 가속하며 떠나고, 조금 뒤 카드가 떨어져 아주 조금 지나쳤다가 제자리에 앉는다
-  const ASCEND_MS = 380;
-  const ASCEND_EASE = 'cubic-bezier(0.6, 0, 0.9, 0.45)';
-  const FALL_DELAY_MS = 120;
-  const FALL_MS = 560;
-  const FALL_EASE = 'cubic-bezier(0.2, 0.85, 0.3, 1.04)';
+  // 되돌릴 때는 별이 같은 포물선을 거꾸로 날아오고, 닿는 순간 그 점에서 카드가 커져 아주 조금 지나쳤다가 제자리에 앉는다
+  const RETURN_MS = 700;
+  const RETURN_EASE = 'cubic-bezier(0.4, 0, 0.6, 1)';
+  const GROW_MS = 480;
+  const GROW_EASE = 'cubic-bezier(0.2, 0.85, 0.3, 1.04)';
 
   function rand(min, max) {
     return min + Math.random() * (max - min);
@@ -58,7 +67,7 @@
     const root = document.documentElement;
     const headerLine = cssPx(root, '--header-gap') + cssPx(root, '--header-height');
 
-    // 카드(바깥 상자) → { body, state, side, landing, anim, meteor, star }
+    // 카드(바깥 상자) → { body, state, side, anchor, anim, meteor, star }
     // state는 가는 방향이다. here(제자리) → throwing(날아가는 중) → gone(날아감) → returning(돌아오는 중) → here.
     // 도중에 방향을 바꾸면 throwing과 returning이 서로 바뀐다
     const cards = new WeakMap();
@@ -72,7 +81,7 @@
       // 움직이는 쪽은 안쪽 카드다. 없으면 card 조각이 바뀐 것이므로 넘어가지 않고 여기서 드러낸다
       const body = card.querySelector(':scope > .post-card');
       if (!body) throw new Error('.post-summary 안에 .post-card가 없습니다');
-      cards.set(card, { body, state: 'here', side: 1, landing: null, anim: null, meteor: null, star: null });
+      cards.set(card, { body, state: 'here', side: 1, anchor: 0, anim: null, meteor: null, star: null });
       observer.observe(card);
     }
 
@@ -86,31 +95,50 @@
       return layer;
     }
 
-    // x에서 화면 가장자리 쪽(side)으로 want만큼, 모자라면 가장자리 3px 앞까지 옮긴 위치.
-    // 유성은 카드 뒤에 그려서 카드와 겹치면 가려진다. 그래서 유성 길은 별이 앉는 바깥 여백 안에서만 잡는다
-    function edgeward(x, side, want) {
-      const room = side < 0 ? x - 3 : window.innerWidth - 3 - x;
-      return x + side * Math.min(want, Math.max(0, room));
+    // from에서 꼭대기 높이 apexY를 지나 to로 가는 포물선. 가로는 시간에 고르게 가고 세로는 2차식이라
+    // 던진 물체처럼 꼭대기에서 느려진다. 꼭대기 시점 ta는 양쪽 높이 차의 제곱근 비로 정해진다
+    function arcPoints(from, to, apexY) {
+      const up = Math.max(1, from.y - apexY);
+      const down = Math.max(1, to.y - apexY);
+      const ratio = Math.sqrt(up / down);
+      const ta = ratio / (1 + ratio);
+      const k = up / (ta * ta);
+      const points = [];
+      for (let i = 0; i <= ARC_STEPS; i++) {
+        const t = i / ARC_STEPS;
+        points.push({ t, x: from.x + (to.x - from.x) * t, y: apexY + k * (t - ta) * (t - ta) });
+      }
+      return points;
     }
 
-    // from에서 to로 유성 하나를 날린다. tail은 꼬리 길이 비율 [처음, 끝]. 빠를 때 길고 느려지면 짧다
-    function flyMeteor(from, to, { duration, easing, tail, fadeIn, onArrive }) {
+    // 포물선 위로 유성 하나를 날린다. tail은 꼬리 길이 비율 [처음, 끝]. 빠를 때 길고 느려지면 짧다.
+    // 꼬리는 점마다 나아가는 방향으로 돌린다. 각도는 ±180°를 넘을 때 끊기지 않게 이어 붙인다(왼쪽으로 날 때)
+    function flyMeteor(points, { duration, easing, tail, fadeIn, onArrive }) {
       const meteor = document.createElement('div');
       meteor.className = 'meteor';
       meteor.innerHTML = '<i class="meteor-tail"></i><i class="meteor-head"></i>';
       meteorLayer().appendChild(meteor);
 
-      const angle = Math.atan2(to.y - from.y, to.x - from.x) * 180 / Math.PI;
+      const last = points.length - 1;
+      let prev = null;
+      const angles = points.map((p, i) => {
+        const a = points[Math.max(0, i - 1)];
+        const b = points[Math.min(last, i + 1)];
+        let deg = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+        if (prev !== null) deg += 360 * Math.round((prev - deg) / 360);
+        prev = deg;
+        return deg;
+      });
       const timing = { duration, easing, fill: 'forwards' };
-      const move = meteor.animate([
-        { transform: `translate(${from.x}px, ${from.y}px)`, opacity: fadeIn ? 0 : 1 },
-        { opacity: 1, offset: 0.12 },
-        { transform: `translate(${to.x}px, ${to.y}px)`, opacity: 1 }
-      ], timing);
-      meteor.firstChild.animate([
-        { transform: `rotate(${angle}deg) scaleX(${tail[0]})` },
-        { transform: `rotate(${angle}deg) scaleX(${tail[1]})` }
-      ], timing);
+      const move = meteor.animate(points.map(p => ({
+        offset: p.t,
+        transform: `translate(${p.x}px, ${p.y}px)`,
+        opacity: fadeIn ? Math.min(1, p.t / 0.12) : 1
+      })), timing);
+      meteor.firstChild.animate(points.map((p, i) => ({
+        offset: p.t,
+        transform: `rotate(${angles[i]}deg) scaleX(${tail[0] + (tail[1] - tail[0]) * p.t})`
+      })), timing);
 
       let stopped = false;
       move.onfinish = () => {
@@ -178,23 +206,40 @@
     // 가던 길을 지금 모습에서 거꾸로 간다. 남은 길이 짧으면 그만큼 빨리 끝난다
     function turnBack(c, state) {
       c.state = state;
+      // 돌아오던 중에 다시 날리면, 카드 자리로 날아오던 유성은 더 오지 않는다
+      if (state === 'throwing' && c.meteor) {
+        c.meteor.cancel();
+        c.meteor = null;
+      }
       c.anim.reverse();
     }
 
-    // 화면 위로 나간 채 멈춘다. 헤더 밑, 별자리보다 화면 가장자리 쪽에서 유성이 나와 별자리로 비스듬히 내려앉는다.
-    // 휴대폰은 여백이 20px라 거의 곧게 떨어진다
+    // 카드가 점이 되어 사라진 순간. 그 점에서 유성이 포물선을 그리며 헤더 뒤까지 솟았다가 카드 옆으로 내려앉는다.
+    // 별자리는 데스크톱은 카드 옆 빈 하늘, 휴대폰은 카드 옆 여백(20px)이다. spread 0이면 카드 가장자리, 1이면 화면 끝.
+    // 유성은 카드 뒤 층에 그린다. 그래서 별자리는 카드 자리 아랫변보다 위에서 고른다. 가로로 카드 폭 안에 있는 동안
+    // 유성은 방금 비운 카드 자리(.thrown) 높이에 있어서 다음 카드에 가려지지 않는다
     function leave(card, c) {
       // 클래스를 먼저 붙이고 애니메이션을 지워야 제자리에 카드가 한 번 비치지 않는다
       card.classList.add('thrown');
       stopMoving(c);
       c.state = 'gone';
 
-      const landing = c.landing;
-      const from = { x: edgeward(landing.x, c.side, rand(120, 220)), y: headerLine - 12 };
-      c.meteor = later(METEOR_DELAY_MS, () => flyMeteor(from, landing, {
-        duration: METEOR_MS, easing: METEOR_EASE, tail: [1, 0.05], fadeIn: true,
+      // 작아지는 동안 스크롤했을 수 있어 지금 자리를 한 번 읽는다(효과가 끝날 때 한 번뿐이다)
+      const r = card.getBoundingClientRect();
+      const from = { x: r.left + r.width / 2, y: r.top + c.anchor };
+      const half = r.width / 2;
+      const spread = rand(0.25, 0.75);
+      const low = Math.max(headerLine + 60, Math.min(r.bottom - 12, window.innerHeight * 0.5));
+      const landing = {
+        x: from.x + c.side * (half * (1 - spread) + window.innerWidth / 2 * spread),
+        y: rand(headerLine + 40, low)
+      };
+      // 기다리지 않고 바로 띄운다. 타이머를 거치면 별 크기 카드가 사라진 뒤 유성이 나오기까지 두 프레임이 비었다
+      if (off) return;
+      c.meteor = flyMeteor(arcPoints(from, landing, headerLine - ARC_OVER), {
+        duration: ARC_MS, easing: ARC_EASE, tail: [0.8, 0.05], fadeIn: false,
         onArrive: () => light(c, landing)
-      }));
+      });
     }
 
     function arrive(c) {
@@ -205,22 +250,35 @@
     function throwUp(card, c, rect) {
       c.state = 'throwing';
       c.side = Math.random() < 0.5 ? -1 : 1;
+      c.anchor = anchorOf(rect);
 
-      // 별이 앉을 자리. 데스크톱은 카드 옆 빈 하늘, 휴대폰은 카드 옆 여백(20px).
-      // spread 0이면 카드 가장자리, 1이면 화면 끝
-      const half = rect.width / 2;
-      const spread = rand(0.25, 0.75);
-      c.landing = {
-        x: rect.left + half + c.side * (half * (1 - spread) + window.innerWidth / 2 * spread),
-        y: headerLine + rand(90, Math.max(120, (window.innerHeight - headerLine) * 0.5))
-      };
+      move(card, c, shrinkFrames(c, rect), { duration: THROW_MS, easing: THROW_EASE });
+    }
 
-      const lift = rect.bottom + LIFT_EXTRA;
-      move(card, c, [
-        { transform: 'translateY(0) scale(1)', opacity: 1 },
-        { opacity: 1, offset: 0.75 },
-        { transform: `translateY(${-lift}px) scale(0.92)`, opacity: 0 }
-      ], { duration: THROW_MS, easing: THROW_EASE });
+    // 카드 크기(1)에서 별 크기(starScale)까지 같은 비율로 줄어드는 키프레임. 되돌릴 때는 이것을 거꾸로 쓴다
+    function shrinkFrames(c, rect) {
+      const starScale = Math.min(1, STAR_PX / rect.width);
+      const frames = [];
+      for (let i = 0; i <= SHRINK_STEPS; i++) {
+        const t = i / SHRINK_STEPS;
+        frames.push({ offset: t, transform: pose(c, rect, Math.pow(starScale, t)) });
+      }
+      return frames;
+    }
+
+    // 작아지는 기준점. 카드 자리 윗변에서 헤더 밑에 보이는 부분의 한가운데까지의 거리다.
+    // 카드 가운데는 헤더 뒤에 있어서 가운데 기준이면 보이던 부분이 줄면서 헤더 뒤로 끌려 들어간다
+    function anchorOf(rect) {
+      return (Math.max(rect.top, headerLine) + rect.bottom) / 2 - rect.top;
+    }
+
+    // 기준점을 고정한 채 scale배 한 모습. transform-origin을 바꾸지 않고 같은 효과의 translate를 더해서,
+    // 움직이는 속성은 transform과 opacity뿐이다. 가운데 기준으로 scale(s)하면 기준점은 가운데 쪽으로
+    // (1-s)×(기준점-가운데)만큼 끌려오므로 그만큼 되민다. translate와 scale이 같은 비율로 바뀌어서
+    // 키프레임 사이에서도 기준점은 움직이지 않는다
+    function pose(c, rect, scale) {
+      const y = (1 - scale) * (c.anchor - rect.height / 2);
+      return `translate(0px, ${y}px) scale(${scale})`;
     }
 
     function bringBack(card, c, rect) {
@@ -229,8 +287,11 @@
         c.meteor.cancel();
         c.meteor = null;
       }
+      c.anchor = anchorOf(rect);
 
-      // 별이 남아 있으면 들어왔던 길을 거슬러 위로 빠져나가고, 그 뒤에 카드가 떨어진다
+      // 별이 남아 있으면 같은 포물선을 거꾸로 날아와 카드 자리에 닿고, 그때부터 카드가 커진다.
+      // 별이 하늘과 함께 되감겨 없으면 카드만 커진다
+      const point = { x: rect.left + rect.width / 2, y: rect.top + c.anchor };
       let delay = 0;
       const star = c.star;
       c.star = null;
@@ -238,18 +299,18 @@
         const r = star.getBoundingClientRect();
         const from = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
         forgetStar(star);
-        const to = { x: edgeward(from.x, c.side, rand(120, 220)), y: headerLine - 30 };
-        flyMeteor(from, to, { duration: ASCEND_MS, easing: ASCEND_EASE, tail: [0.15, 1], fadeIn: false });
-        delay = FALL_DELAY_MS;
+        c.meteor = later(0, () => flyMeteor(arcPoints(from, point, headerLine - ARC_OVER), {
+          duration: RETURN_MS, easing: RETURN_EASE, tail: [0.15, 0.6], fadeIn: false
+        }));
+        delay = RETURN_MS;
       }
 
-      const lift = rect.bottom + LIFT_EXTRA;
       card.classList.remove('thrown');
-      move(card, c, [
-        { transform: `translateY(${-lift}px) scale(0.92)`, opacity: 0 },
-        { opacity: 1, offset: 0.3 },
-        { transform: 'translateY(0) scale(1)', opacity: 1 }
-      ], { duration: FALL_MS, delay, easing: FALL_EASE });
+      // 별 크기에서 카드 크기까지 같은 길을 거꾸로 커진다. 유성이 닿기 전(delay)에는 별 크기 카드가 미리 보이지 않게
+      // 첫 모습만 투명하게 두고, 커지기 시작하면 바로 보인다
+      const grow = shrinkFrames(c, rect).reverse().map(f => ({ offset: 1 - f.offset, transform: f.transform, opacity: 1 }));
+      grow[0].opacity = 0;
+      move(card, c, grow, { duration: GROW_MS, delay, easing: GROW_EASE });
     }
 
     // 화면 위가 아닌 곳에서 다시 만난 날아간 카드(맨 위로 건너뛰었다가 내려온 경우 등)와
