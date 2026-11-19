@@ -78,6 +78,33 @@ body {
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
+/* flex의 space-between은 검색창을 "로고와 오른쪽 메뉴 사이 빈칸"의 가운데에 둔다.
+   오른쪽 메뉴가 로그인 여부와 닉네임 길이에 따라 넓어지면 검색창도 따라 밀려서(834px 로그아웃 37.5px, 로그인 -33.1px)
+   양옆 칸을 같은 1fr로 두고 검색창을 가운데 칸에 넣는다. 양옆 폭이 달라도 가운데 칸은 바 한가운데다.
+   한쪽 내용이 제 칸보다 넓어지면 grid가 그 칸을 늘려 겹치지 않게 하는 대신 그만큼 가운데가 어긋난다.
+   가운데 칸을 auto가 아니라 minmax(0, 240px)로 둔 건 flex 때의 "평소 240px, 모자라면 줄어듦"을 지키려는 것이다.
+   640px 이하는 검색창이 돋보기로 접혀 오른쪽 아이콘 옆에 붙어야 해서 flex 그대로 둔다. */
+@media (min-width: 641px) {
+    .header-bar {
+        display: grid;
+        grid-template-columns: 1fr minmax(0, 240px) 1fr;
+        column-gap: 16px;
+    }
+
+    .header-bar .logo {
+        justify-self: start;
+    }
+
+    .header-bar .user-info {
+        justify-self: end;
+    }
+
+    /* 칸 사이 간격은 column-gap이 맡는다 */
+    .header-bar .search-box {
+        margin: 0;
+    }
+}
+
 .header-bar .logo {
     display: flex;
     align-items: center;
