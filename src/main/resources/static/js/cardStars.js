@@ -43,6 +43,8 @@
   const ARC_EASE = 'cubic-bezier(0.25, 0.1, 0.35, 1)';
   // 포물선을 이만큼 잘라 키프레임으로 찍는다. 꼬리 방향도 점마다 맞춘다(약 0.04초 간격)
   const ARC_STEPS = 24;
+  // 별이 화면 높이 전체를 내려가는 데 적어도 경로의 이만큼은 쓴다(landingY)
+  const FALL_SHARE = 0.1;
 
   // 되돌릴 때는 별이 같은 포물선을 거꾸로 날아오고, 닿는 순간 그 점에서 카드가 커져 아주 조금 지나쳤다가 제자리에 앉는다
   const RETURN_MS = 700;
@@ -96,19 +98,48 @@
     }
 
     // from에서 꼭대기 높이 apexY를 지나 to로 가는 포물선. 가로는 시간에 고르게 가고 세로는 2차식이라
-    // 던진 물체처럼 꼭대기에서 느려진다. 꼭대기 시점 ta는 양쪽 높이 차의 제곱근 비로 정해진다
-    function arcPoints(from, to, apexY) {
-      const up = Math.max(1, from.y - apexY);
-      const down = Math.max(1, to.y - apexY);
-      const ratio = Math.sqrt(up / down);
-      const ta = ratio / (1 + ratio);
-      const k = up / (ta * ta);
-      const points = [];
-      for (let i = 0; i <= ARC_STEPS; i++) {
-        const t = i / ARC_STEPS;
-        points.push({ t, x: from.x + (to.x - from.x) * t, y: apexY + k * (t - ta) * (t - ta) });
-      }
-      return points;
+    // 던진 물체처럼 꼭대기에서 느려진다. 꼭대기 시점 ta 앞뒤로 휘는 정도가 달라도 꼭대기에서 기울기가 0이라 꺾이지 않는다
+    function arcPoints(from, to, apexY, ta) {
+      const kUp = Math.max(1, from.y - apexY) / (ta * ta);
+      const kDown = Math.max(1, to.y - apexY) / ((1 - ta) * (1 - ta));
+      // 꼭대기 시점도 점으로 찍는다. 점 사이는 직선으로 이어져서, 꼭대기가 두 점 사이에 있으면
+      // 카드 가장자리를 넘기 전부터 비스듬히 내려가 카드 폭 안을 지났다(휴대폰에서 꼭대기가 0.99일 때)
+      const ts = [];
+      for (let i = 0; i <= ARC_STEPS; i++) ts.push(i / ARC_STEPS);
+      ts.push(ta);
+      ts.sort((p, q) => p - q);
+      return ts.map(t => {
+        const k = t < ta ? kUp : kDown;
+        return { t, x: from.x + (to.x - from.x) * t, y: apexY + k * (t - ta) * (t - ta) };
+      });
+    }
+
+    // 카드 옆 하늘과 카드 자리 사이를 잇는 포물선. 꼭대기를 유성이 카드 가장자리를 넘는 순간에 둔다.
+    // 유성은 카드 뒤 층이라 카드 폭 안에서 내려가면 다음 카드에 가려진다. 꼭대기가 가장자리에 있으면 카드 폭 안에서는
+    // 비운 카드 자리와 헤더 뒤로 오르기만 하고, 내려가는 길은 전부 카드 밖 하늘이라 어느 높이에 앉아도 가려지지 않는다.
+    // 예전에는 꼭대기 시점을 오르내리는 높이 비로 정해서, 낮게 앉을수록 꼭대기가 일찍 와 카드 폭 안에서 내려갔다.
+    // 그래서 별자리를 위쪽에서만 골라야 했고 별이 화면 위쪽에만 몰렸다(유저 확인)
+    function arcBesideCard(from, to, cardX, half) {
+      return arcPoints(from, to, headerLine - ARC_OVER, edgeTime(from, to, cardX, half));
+    }
+
+    // 유성이 카드 가장자리를 넘는 시점(0~1). 가로는 시간에 고르게 간다
+    function edgeTime(from, to, cardX, half) {
+      const sky = from.x === cardX ? to : from;
+      const edgeX = cardX + Math.sign(sky.x - cardX) * half;
+      const dx = to.x - from.x;
+      return dx === 0 ? 0.5 : Math.min(0.995, Math.max(0.1, (edgeX - from.x) / dx));
+    }
+
+    // 별이 앉을 높이. 헤더 밑부터 하단 탭 위까지 고르되, 카드 밖 하늘에 머무는 시간만큼만 내려간다.
+    // 화면 높이 전체를 경로의 FALL_SHARE 안에 내려가는 빠르기가 상한이다. 휴대폰은 카드 옆 여백이 20px라 경로의 1~3%만
+    // 카드 밖이어서, 상한 없이 낮게 앉히면 별이 수십 ms 만에 뚝 떨어지는 줄처럼 보였다. 그래서 휴대폰은 위쪽 근처에 앉는다
+    function landingY(ta) {
+      const top = headerLine + 40;
+      const tabs = document.querySelector('.feed-tabs');
+      const bottom = (tabs ? tabs.getBoundingClientRect().top : window.innerHeight) - 24;
+      const reach = Math.min(1, (1 - ta) / FALL_SHARE);
+      return rand(top, Math.max(top + 20, top + (bottom - top) * reach));
     }
 
     // 포물선 위로 유성 하나를 날린다. tail은 꼬리 길이 비율 [처음, 끝]. 빠를 때 길고 느려지면 짧다.
@@ -216,8 +247,7 @@
 
     // 카드가 점이 되어 사라진 순간. 그 점에서 유성이 포물선을 그리며 헤더 뒤까지 솟았다가 카드 옆으로 내려앉는다.
     // 별자리는 데스크톱은 카드 옆 빈 하늘, 휴대폰은 카드 옆 여백(20px)이다. spread 0이면 카드 가장자리, 1이면 화면 끝.
-    // 유성은 카드 뒤 층에 그린다. 그래서 별자리는 카드 자리 아랫변보다 위에서 고른다. 가로로 카드 폭 안에 있는 동안
-    // 유성은 방금 비운 카드 자리(.thrown) 높이에 있어서 다음 카드에 가려지지 않는다
+    // 유성은 카드 뒤 층에 그린다. 가려지지 않게 하는 방법은 arcBesideCard에 있다
     function leave(card, c) {
       // 클래스를 먼저 붙이고 애니메이션을 지워야 제자리에 카드가 한 번 비치지 않는다
       card.classList.add('thrown');
@@ -229,14 +259,11 @@
       const from = { x: r.left + r.width / 2, y: r.top + c.anchor };
       const half = r.width / 2;
       const spread = rand(0.25, 0.75);
-      const low = Math.max(headerLine + 60, Math.min(r.bottom - 12, window.innerHeight * 0.5));
-      const landing = {
-        x: from.x + c.side * (half * (1 - spread) + window.innerWidth / 2 * spread),
-        y: rand(headerLine + 40, low)
-      };
+      const landing = { x: from.x + c.side * (half * (1 - spread) + window.innerWidth / 2 * spread), y: 0 };
+      landing.y = landingY(edgeTime(from, landing, from.x, half));
       // 기다리지 않고 바로 띄운다. 타이머를 거치면 별 크기 카드가 사라진 뒤 유성이 나오기까지 두 프레임이 비었다
       if (off) return;
-      c.meteor = flyMeteor(arcPoints(from, landing, headerLine - ARC_OVER), {
+      c.meteor = flyMeteor(arcBesideCard(from, landing, from.x, half), {
         duration: ARC_MS, easing: ARC_EASE, tail: [0.8, 0.05], fadeIn: false,
         onArrive: () => light(c, landing)
       });
@@ -299,7 +326,7 @@
         const r = star.getBoundingClientRect();
         const from = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
         forgetStar(star);
-        c.meteor = later(0, () => flyMeteor(arcPoints(from, point, headerLine - ARC_OVER), {
+        c.meteor = later(0, () => flyMeteor(arcBesideCard(from, point, point.x, rect.width / 2), {
           duration: RETURN_MS, easing: RETURN_EASE, tail: [0.15, 0.6], fadeIn: false
         }));
         delay = RETURN_MS;
