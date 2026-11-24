@@ -1,7 +1,37 @@
-# practice-sns
+# outplanetton
 
-Java와 Spring Boot 학습을 위해 만든 SNS 프로젝트입니다.
+사진을 올리고 팔로우, 좋아요, 댓글, DM으로 소통하는 인스타그램형 SNS입니다.
 RESTful API(`/api/**`)와 Thymeleaf 서버사이드 렌더링을 함께 사용합니다.
+
+## 🖼 화면
+
+| 피드 | 게시글 상세 |
+|---|---|
+| ![피드](docs/images/feed.jpg) | ![게시글 상세](docs/images/post-detail.jpg) |
+
+| 프로필 | DM |
+|---|---|
+| ![프로필](docs/images/profile.jpg) | ![DM](docs/images/chat.jpg) |
+
+## 🧭 구조
+
+```mermaid
+flowchart LR
+    B[브라우저] -->|페이지, /api/**| F[JwtAuthFilter]
+    F --> C[컨트롤러<br>Thymeleaf 화면 + REST API]
+    C --> S[서비스]
+    S --> DB[(MySQL)]
+    S -->|같은 트랜잭션| O[(Outbox 테이블)]
+    O --> R[Outbox 릴레이<br>ShedLock으로 한 대만]
+    R --> K[[Kafka]]
+    K --> N[알림 소비자]
+    N --> DB
+    N --> P[WebSocket 푸시]
+    S --> P
+    P -.->|배지, DM| B
+```
+
+좋아요, 댓글, 팔로우는 저장과 같은 트랜잭션에서 Outbox에 이벤트를 적고, 릴레이가 Kafka로 보내면 소비자가 알림을 저장한 뒤 접속 중인 사용자에게 푸시합니다. 이유는 아래 알림 절에 있습니다.
 
 ## 🛠 기술 스택
 
@@ -136,7 +166,7 @@ RESTful API(`/api/**`)와 Thymeleaf 서버사이드 렌더링을 함께 사용�
   - 처리한 줄은 바로 지우지 않고 처리 시각(Kafka가 받은 시각)을 남겨 7일 뒤 지움. "알림이 안 왔다"를 이벤트 누락, 릴레이 지연, Kafka 뒤 문제로 나눠 볼 수 있음. 처리 시각 - 생성 시각은 Kafka에 넣기까지의 지연이고, 알림이 만들어지기까지는 소비자 쪽 시간이 더 붙음
   - 폴링 비용(실서비스 DB와 별개의 MySQL 8.4, 처리된 줄 100만, `EXPLAIN ANALYZE` 7회 중앙값): 인덱스 없이 343ms(100만 줄 전부 확인) → `(processed_at, failed_at, id)` 인덱스로 처리할 줄이 없을 때 0.008ms, 200줄 있을 때 0.25ms
   - 이벤트에는 엔티티 대신 id만 담고 JSON으로 적음. Outbox의 JSON을 그대로 Kafka 메시지로 보냄. Avro와 스키마 레지스트리는 운영할 서버가 하나 더 늘고, 받는 곳이 우리 앱 하나라 형식 계약을 강제할 상대가 없어서 쓰지 않음
-  - 이 규모(수만 MAU)에서는 Outbox와 폴링만으로 충분하다고 봄. Kafka는 이벤트를 받는 곳이 늘어나는 상황을 가정하고 붙임
+  - 이 규모(수만 MAU)에서는 Outbox와 폴링만으로 충분하다고 봄. Kafka는 직접 다뤄 보려고 붙였고, 이벤트를 받는 곳이 늘어나는 상황을 가정해 구성함
 
 ---
 
