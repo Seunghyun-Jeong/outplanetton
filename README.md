@@ -16,7 +16,7 @@ RESTful API(`/api/**`)와 Thymeleaf 서버사이드 렌더링을 함께 사용�
 ## 🧭 구조
 
 ```mermaid
-flowchart LR
+flowchart TD
     B[브라우저] -->|페이지, /api/**| F[JwtAuthFilter]
     F --> C[컨트롤러<br>Thymeleaf 화면 + REST API]
     C --> S[서비스]
